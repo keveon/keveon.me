@@ -1,0 +1,87 @@
+{
+  "name": "keveon.me",
+  "author": "keveon",
+  "version": "1.0.0",
+  "description": "This is keveon's blog.",
+  "scripts": {
+    "start": "vuepress dev docs",
+    "build": "vuepress build docs",
+    "serve": "vuepress serve docs",
+    "prettier": "prettier --write '**/*.{md,vue,js}'",
+    "prettier-watch": "onchange '**/**.{md,vue,js}' 'docs/.vuepress/**/**.{md,vue,js}' -- prettier --write {{changed}}"
+  },
+  "keywords": [
+    "keveon",
+    "devops",
+    "golang",
+    "python",
+    "docker",
+    "gitlab-ci",
+    "kubernetes"
+  ],
+  "homepage": "https://github.com/keveon/keveon.me#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/keveon/keveon.me.git"
+  },
+  "bugs": {
+    "url": "https://github.com/keveon/keveon.me/issues"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@vssue/vuepress-plugin-vssue": "^1.0.2",
+    "@vuepress/plugin-back-to-top": "^1.0.2",
+    "@vuepress/plugin-google-analytics": "^1.0.2",
+    "@vuepress/plugin-medium-zoom": "^1.0.2",
+    "@vuepress/plugin-nprogress": "^1.0.2",
+    "@vuepress/plugin-pwa": "^1.0.2",
+    "@vuepress/theme-default": "^1.0.2",
+    "axios": "^0.21.0",
+    "gitalk": "^1.5.0",
+    "husky": "^4.3.0",
+    "lint-staged": "^10.5.2",
+    "lodash": "^4.17.15",
+    "lodash.template": "^4.5.0",
+    "markdown-it-abbr": "^1.0.4",
+    "markdown-it-footnote": "^3.0.2",
+    "markdown-it-include": "^2.0.0",
+    "markdown-it-ins": "^3.0.0",
+    "markdown-it-kbd": "^2.0.0",
+    "markdown-it-mark": "^3.0.0",
+    "markdown-it-replacements": "^1.0.1",
+    "markdown-it-smartarrows": "^1.0.1",
+    "markdown-it-sub": "^1.0.0",
+    "markdown-it-sup": "^1.0.0",
+    "markdown-it-task-lists": "^2.1.1",
+    "onchange": "^7.1.0",
+    "prettier": "^2.2.1",
+    "vue-toasted": "^1.1.27",
+    "vuepress": "^1.0.2",
+    "vuepress-plugin-container": "^2.0.2",
+    "vuepress-plugin-git-log": "^1.0.1",
+    "vuepress-plugin-mathjax": "^1.2.8",
+    "vuepress-plugin-serve": "^2.0.4"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "**/**.{md,vue,js}": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "prettier": {
+    "singleQuote": true,
+    "semi": false,
+    "tabWidth": 2,
+    "printWidth": 120,
+    "proseWrap": "never"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=8"
+  }
+}

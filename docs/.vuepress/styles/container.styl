@@ -1,0 +1,35 @@
+.theorem
+  margin 1rem 0
+  padding .1rem 1.5rem
+  border-radius 0.4rem
+  background-color #f0f4f8
+  .title
+    font-weight bold
+
+.custom-block
+  &.right
+    color transparentify($textColor, 0.4)
+    font-size 0.9rem
+    text-align right
+  &.center
+    color transparentify($textColor, 0.4)
+    font-size 0.9rem
+    text-align center
+
+pre.tree-container
+  border-left-width: .5rem;
+  border-left-style: solid;
+  border-color: #42b983;
+  border-radius: 0;
+  & > code
+    font-size: 14px !important;
+    & > p
+      margin: -5px 0 -20px 0;
+    code
+      background-color: #42b983 !important;
+      padding: 3px 5px;
+      border-radius: 3px;
+      color #000
+    em
+      color #808080
+      font-weight light

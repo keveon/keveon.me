@@ -78,14 +78,14 @@ devDependencies:
     specifier: ^7.1.0
     version: 7.1.0
   prettier:
-    specifier: ^3.1.1
-    version: 3.1.1
+    specifier: ^3.2.5
+    version: 3.2.5
   vue-toasted:
     specifier: ^1.1.28
     version: 1.1.28
   vuepress:
     specifier: ^1.9.10
-    version: 1.9.10(lodash@4.17.21)(prettier@3.1.1)(react-dom@15.7.0)(react@15.7.0)
+    version: 1.9.10(lodash@4.17.21)(prettier@3.2.5)(react-dom@15.7.0)(react@15.7.0)
   vuepress-plugin-container:
     specifier: ^2.1.5
     version: 2.1.5
@@ -1629,7 +1629,7 @@ packages:
       vuepress: ^1.0.0
     dependencies:
       vssue: 1.4.8
-      vuepress: 1.9.10(lodash@4.17.21)(prettier@3.1.1)(react-dom@15.7.0)(react@15.7.0)
+      vuepress: 1.9.10(lodash@4.17.21)(prettier@3.2.5)(react-dom@15.7.0)(react@15.7.0)
     dev: true
 
   /@vue/babel-helper-vue-jsx-merge-props@1.4.0:
@@ -1865,7 +1865,7 @@ packages:
       - whiskers
     dev: true
 
-  /@vuepress/core@1.9.10(lodash@4.17.21)(prettier@3.1.1)(react-dom@15.7.0)(react@15.7.0):
+  /@vuepress/core@1.9.10(lodash@4.17.21)(prettier@3.2.5)(react-dom@15.7.0)(react@15.7.0):
     resolution: {integrity: sha512-H9ddo5fSinPb8QYl8OJFbZikMpOW84bm/U3Drzz8CnCXNtpda7CU2wX/XzOhe98G8jp45xhtZRkxOrqzBBAShA==}
     engines: {node: '>=8.6'}
     dependencies:
@@ -1899,7 +1899,7 @@ packages:
       toml: 3.0.0
       url-loader: 1.1.2(webpack@4.47.0)
       vue: 2.7.15
-      vue-loader: 15.11.1(cache-loader@3.0.1)(css-loader@2.1.1)(lodash@4.17.21)(prettier@3.1.1)(react-dom@15.7.0)(react@15.7.0)(vue-template-compiler@2.7.15)(webpack@4.47.0)
+      vue-loader: 15.11.1(cache-loader@3.0.1)(css-loader@2.1.1)(lodash@4.17.21)(prettier@3.2.5)(react-dom@15.7.0)(react@15.7.0)(vue-template-compiler@2.7.15)(webpack@4.47.0)
       vue-router: 3.6.5(vue@2.7.15)
       vue-server-renderer: 2.7.15
       vue-template-compiler: 2.7.15
@@ -7969,8 +7969,8 @@ packages:
     dev: true
     optional: true
 
-  /prettier@3.1.1:
-    resolution: {integrity: sha512-22UbSzg8luF4UuZtzgiUOfcGM8s4tjBv6dJRT7j275NXsy2jb4aJa4NNveul5x4eqlF1wuhuR2RElK71RvmVaw==}
+  /prettier@3.2.5:
+    resolution: {integrity: sha512-3/GWa9aOC0YeD7LUfvOG2NiDyhOWRvt1k+rcKhOuYnMY24iiCphgneUfJDyFXd6rZCAnuLBv6UeAULtrhT/F4A==}
     engines: {node: '>=14'}
     hasBin: true
     dev: true
@@ -9795,7 +9795,7 @@ packages:
       vue: 2.7.15
     dev: true
 
-  /vue-loader@15.11.1(cache-loader@3.0.1)(css-loader@2.1.1)(lodash@4.17.21)(prettier@3.1.1)(react-dom@15.7.0)(react@15.7.0)(vue-template-compiler@2.7.15)(webpack@4.47.0):
+  /vue-loader@15.11.1(cache-loader@3.0.1)(css-loader@2.1.1)(lodash@4.17.21)(prettier@3.2.5)(react-dom@15.7.0)(react@15.7.0)(vue-template-compiler@2.7.15)(webpack@4.47.0):
     resolution: {integrity: sha512-0iw4VchYLePqJfJu9s62ACWUXeSqM30SQqlIftbYWM3C+jpPcEHKSPUZBLjSF9au4HTHQ/naF6OGnO3Q/qGR3Q==}
     peerDependencies:
       '@vue/compiler-sfc': ^3.0.8
@@ -9819,7 +9819,7 @@ packages:
       css-loader: 2.1.1(webpack@4.47.0)
       hash-sum: 1.0.2
       loader-utils: 1.4.2
-      prettier: 3.1.1
+      prettier: 3.2.5
       vue-hot-reload-api: 2.3.4
       vue-style-loader: 4.1.3
       vue-template-compiler: 2.7.15
@@ -10000,13 +10000,13 @@ packages:
       smoothscroll-polyfill: 0.4.4
     dev: true
 
-  /vuepress@1.9.10(lodash@4.17.21)(prettier@3.1.1)(react-dom@15.7.0)(react@15.7.0):
+  /vuepress@1.9.10(lodash@4.17.21)(prettier@3.2.5)(react-dom@15.7.0)(react@15.7.0):
     resolution: {integrity: sha512-UnGm9vjQvG918SZVNvgiUlNimLqawdYPq0aPRXDpEB1VksvqegVFy/GKdA8ShXJaEpOMPSt7YD4uK21jaMs3kA==}
     engines: {node: '>=8.6'}
     hasBin: true
     requiresBuild: true
     dependencies:
-      '@vuepress/core': 1.9.10(lodash@4.17.21)(prettier@3.1.1)(react-dom@15.7.0)(react@15.7.0)
+      '@vuepress/core': 1.9.10(lodash@4.17.21)(prettier@3.2.5)(react-dom@15.7.0)(react@15.7.0)
       '@vuepress/theme-default': 1.9.10
       '@vuepress/types': 1.9.10
       cac: 6.7.14

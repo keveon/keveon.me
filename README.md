@@ -11,5 +11,5 @@ features:
     details: 不想写描述了，随便来点啥吧……
   - title: 程序猿
     details: 你可以怀疑我的职业，但不能否定我的爱好，我就要做一只傲娇的猿。
-footer: MIT Licensed | Copyright © 2017-2019 Keveon Wang
+footer: MIT Licensed | Copyright © 2017-2024 Keveon Wang
 ---

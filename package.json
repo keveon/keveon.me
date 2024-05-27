@@ -37,7 +37,7 @@
     "@vuepress/theme-default": "^1.9.10",
     "axios": "^1.7.0",
     "gitalk": "^1.8.0",
-    "lint-staged": "^15.2.2",
+    "lint-staged": "^15.2.5",
     "lodash": "^4.17.21",
     "lodash.template": "^4.5.0",
     "markdown-it-abbr": "^2.0.0",

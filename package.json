@@ -52,7 +52,7 @@
     "markdown-it-sup": "^2.0.0",
     "markdown-it-task-lists": "^2.1.1",
     "onchange": "^7.1.0",
-    "prettier": "^3.2.5",
+    "prettier": "^3.3.0",
     "vue-toasted": "^1.1.28",
     "vuepress": "^1.9.10",
     "vuepress-plugin-container": "^2.1.5",

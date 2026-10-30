@@ -2,13 +2,18 @@
 	"$schema": "https://emdashcms.com/seed.schema.json",
 	"version": "1",
 	"meta": {
-		"name": "Blog Starter",
-		"description": "A blog with posts and pages",
-		"author": "EmDash"
+		"name": "keveon",
+		"description": "keveon 的名片、作品和文章",
+		"author": "keveon"
 	},
 	"settings": {
-		"title": "My Blog",
-		"tagline": "Thoughts on building for the web"
+		"title": "keveon",
+		"tagline": "建造工具与产品。各自独立，在这里汇成矩阵。",
+		"url": "https://keveon.me",
+		"timezone": "Asia/Shanghai",
+		"social": {
+			"github": "https://github.com/keveon"
+		}
 	},
 	"collections": [
 		{
@@ -16,7 +21,14 @@
 			"label": "Posts",
 			"labelSingular": "Post",
 			"urlPattern": "/posts/{slug}",
-			"supports": ["drafts", "revisions", "preview", "scheduling", "search", "seo"],
+			"supports": [
+				"drafts",
+				"revisions",
+				"preview",
+				"scheduling",
+				"search",
+				"seo"
+			],
 			"commentsEnabled": true,
 			"fields": [
 				{
@@ -49,7 +61,13 @@
 			"label": "Pages",
 			"labelSingular": "Page",
 			"urlPattern": "/pages/{slug}",
-			"supports": ["drafts", "revisions", "preview", "search", "seo"],
+			"supports": [
+				"drafts",
+				"revisions",
+				"preview",
+				"search",
+				"seo"
+			],
 			"fields": [
 				{
 					"slug": "title",
@@ -65,52 +83,240 @@
 					"searchable": true
 				}
 			]
+		},
+		{
+			"slug": "products",
+			"label": "Products",
+			"labelSingular": "Product",
+			"description": "Work shown on the hub.",
+			"urlPattern": "/products/{slug}",
+			"supports": [
+				"drafts",
+				"revisions",
+				"search",
+				"seo"
+			],
+			"titleField": "title",
+			"admin": {
+				"listColumns": [
+					"title",
+					"availability",
+					"order"
+				]
+			},
+			"fields": [
+				{
+					"slug": "title",
+					"label": "Title",
+					"type": "string",
+					"required": true,
+					"searchable": true
+				},
+				{
+					"slug": "summary",
+					"label": "Summary",
+					"type": "text",
+					"searchable": true
+				},
+				{
+					"slug": "cover",
+					"label": "Cover",
+					"type": "image",
+					"translatable": false
+				},
+				{
+					"slug": "body",
+					"label": "Body",
+					"type": "portableText",
+					"searchable": true
+				},
+				{
+					"slug": "features",
+					"label": "Features",
+					"type": "blocks",
+					"validation": {
+						"allowedTypes": [
+							"feature"
+						],
+						"maxItems": 12
+					}
+				},
+				{
+					"slug": "url",
+					"label": "URL",
+					"type": "url",
+					"translatable": false
+				},
+				{
+					"slug": "availability",
+					"label": "Status",
+					"type": "select",
+					"translatable": false,
+					"indexed": true,
+					"defaultValue": "active",
+					"validation": {
+						"options": [
+							"active",
+							"beta",
+							"preview",
+							"retired"
+						]
+					}
+				},
+				{
+					"slug": "order",
+					"label": "Order",
+					"type": "integer",
+					"translatable": false,
+					"indexed": true,
+					"defaultValue": 0
+				}
+			]
 		}
 	],
 	"taxonomies": [
 		{
 			"name": "category",
-			"label": "Categories",
-			"labelSingular": "Category",
+			"label": "分类",
+			"labelSingular": "分类",
 			"hierarchical": true,
-			"collections": ["posts"],
+			"collections": [
+				"posts"
+			],
 			"terms": [
 				{
 					"slug": "development",
-					"label": "Development"
+					"label": "开发",
+					"id": "term-category-development",
+					"locale": "zh"
 				},
 				{
 					"slug": "design",
-					"label": "Design"
+					"label": "设计",
+					"id": "term-category-design",
+					"locale": "zh"
 				},
 				{
 					"slug": "notes",
-					"label": "Notes"
+					"label": "随记",
+					"id": "term-category-notes",
+					"locale": "zh"
+				}
+			],
+			"id": "tax-category",
+			"locale": "zh"
+		},
+		{
+			"name": "tag",
+			"label": "标签",
+			"labelSingular": "标签",
+			"hierarchical": false,
+			"collections": [
+				"posts"
+			],
+			"terms": [
+				{
+					"slug": "webdev",
+					"label": "前端",
+					"id": "term-tag-webdev",
+					"locale": "zh"
+				},
+				{
+					"slug": "opinion",
+					"label": "看法",
+					"id": "term-tag-opinion",
+					"locale": "zh"
+				},
+				{
+					"slug": "tools",
+					"label": "工具",
+					"id": "term-tag-tools",
+					"locale": "zh"
+				},
+				{
+					"slug": "creativity",
+					"label": "创造",
+					"id": "term-tag-creativity",
+					"locale": "zh"
+				}
+			],
+			"id": "tax-tag",
+			"locale": "zh"
+		},
+		{
+			"id": "tax-category-en",
+			"name": "category",
+			"label": "Categories",
+			"labelSingular": "Category",
+			"locale": "en",
+			"translationOf": "tax-category",
+			"hierarchical": true,
+			"collections": [
+				"posts"
+			],
+			"terms": [
+				{
+					"id": "term-category-development-en",
+					"slug": "development",
+					"label": "Development",
+					"locale": "en",
+					"translationOf": "term-category-development"
+				},
+				{
+					"id": "term-category-design-en",
+					"slug": "design",
+					"label": "Design",
+					"locale": "en",
+					"translationOf": "term-category-design"
+				},
+				{
+					"id": "term-category-notes-en",
+					"slug": "notes",
+					"label": "Notes",
+					"locale": "en",
+					"translationOf": "term-category-notes"
 				}
 			]
 		},
 		{
+			"id": "tax-tag-en",
 			"name": "tag",
 			"label": "Tags",
 			"labelSingular": "Tag",
+			"locale": "en",
+			"translationOf": "tax-tag",
 			"hierarchical": false,
-			"collections": ["posts"],
+			"collections": [
+				"posts"
+			],
 			"terms": [
 				{
+					"id": "term-tag-webdev-en",
 					"slug": "webdev",
-					"label": "Web Development"
+					"label": "Web Development",
+					"locale": "en",
+					"translationOf": "term-tag-webdev"
 				},
 				{
+					"id": "term-tag-opinion-en",
 					"slug": "opinion",
-					"label": "Opinion"
+					"label": "Opinion",
+					"locale": "en",
+					"translationOf": "term-tag-opinion"
 				},
 				{
+					"id": "term-tag-tools-en",
 					"slug": "tools",
-					"label": "Tools"
+					"label": "Tools",
+					"locale": "en",
+					"translationOf": "term-tag-tools"
 				},
 				{
+					"id": "term-tag-creativity-en",
 					"slug": "creativity",
-					"label": "Creativity"
+					"label": "Creativity",
+					"locale": "en",
+					"translationOf": "term-tag-creativity"
 				}
 			]
 		}
@@ -130,23 +336,67 @@
 	],
 	"menus": [
 		{
+			"id": "menu-primary",
 			"name": "primary",
-			"label": "Primary Navigation",
+			"label": "主导航",
+			"locale": "zh",
 			"items": [
 				{
+					"id": "nav-products",
 					"type": "custom",
-					"label": "Home",
-					"url": "/"
+					"label": "作品",
+					"url": "/products"
 				},
 				{
+					"id": "nav-posts",
 					"type": "custom",
-					"label": "About",
+					"label": "动态",
+					"url": "/posts"
+				},
+				{
+					"id": "nav-about",
+					"type": "custom",
+					"label": "关于",
 					"url": "/pages/about"
 				},
 				{
+					"id": "nav-contact",
 					"type": "custom",
-					"label": "Posts",
-					"url": "/posts"
+					"label": "联系",
+					"url": "mailto:hello@keveon.com"
+				}
+			]
+		},
+		{
+			"id": "menu-primary-en",
+			"name": "primary",
+			"label": "Primary",
+			"locale": "en",
+			"translationOf": "menu-primary",
+			"items": [
+				{
+					"id": "nav-products-en",
+					"type": "custom",
+					"label": "Work",
+					"url": "/en/products"
+				},
+				{
+					"id": "nav-posts-en",
+					"type": "custom",
+					"label": "Notes",
+					"url": "/en/posts"
+				},
+				{
+					"id": "nav-about-en",
+					"type": "custom",
+					"label": "About",
+					"url": "/en/pages/about"
+				},
+				{
+					"id": "nav-contact-en",
+					"type": "custom",
+					"label": "Contact",
+					"url": "mailto:hello@keveon.com"
 				}
 			]
 		}
@@ -160,22 +410,22 @@
 				{
 					"type": "component",
 					"componentId": "core:search",
-					"title": "Search"
+					"title": "搜索"
 				},
 				{
 					"type": "component",
 					"componentId": "core:categories",
-					"title": "Categories"
+					"title": "分类"
 				},
 				{
 					"type": "component",
 					"componentId": "core:tags",
-					"title": "Tags"
+					"title": "标签"
 				},
 				{
 					"type": "component",
 					"componentId": "core:recent-posts",
-					"title": "Recent Posts",
+					"title": "最近的文章",
 					"props": {
 						"count": 5,
 						"showDate": true
@@ -184,7 +434,7 @@
 				{
 					"type": "component",
 					"componentId": "core:archives",
-					"title": "Archives",
+					"title": "归档",
 					"props": {
 						"type": "monthly",
 						"limit": 6
@@ -199,19 +449,19 @@
 			"widgets": [
 				{
 					"type": "content",
-					"title": "About",
+					"title": "关于",
 					"content": [
 						{
 							"_type": "block",
 							"style": "normal",
+							"_key": "k0",
 							"children": [
 								{
 									"_type": "span",
-									"text": "A blog about software, design, and the occasional stray thought.",
-									"_key": "k1"
+									"_key": "k1",
+									"text": "名片、作品和文章。产品各自有自己的域名。"
 								}
-							],
-							"_key": "k0"
+							]
 						}
 					]
 				}
@@ -221,55 +471,64 @@
 	"sections": [
 		{
 			"slug": "newsletter-signup",
-			"title": "Newsletter Signup",
-			"description": "A call-to-action block for newsletter subscriptions",
-			"keywords": ["newsletter", "subscribe", "email", "cta"],
+			"title": "订阅",
+			"description": "新文章发出时通知一声",
+			"keywords": [
+				"newsletter",
+				"subscribe",
+				"email",
+				"cta"
+			],
 			"source": "theme",
 			"content": [
 				{
 					"_type": "block",
 					"style": "h3",
+					"_key": "k0",
 					"children": [
 						{
 							"_type": "span",
-							"text": "Stay in the loop",
-							"_key": "k1"
+							"_key": "k1",
+							"text": "有新的再告诉你"
 						}
-					],
-					"_key": "k0"
+					]
 				},
 				{
 					"_type": "block",
 					"style": "normal",
+					"_key": "k2",
 					"children": [
 						{
 							"_type": "span",
-							"text": "Get notified when new posts are published. No spam, unsubscribe anytime.",
-							"_key": "k3"
+							"_key": "k3",
+							"text": "文章发出时收一封信。不定期，也可以随时退订。"
 						}
-					],
-					"_key": "k2"
+					]
 				}
 			]
 		},
 		{
 			"slug": "about-author",
-			"title": "About the Author",
-			"description": "Brief author bio for use in posts or pages",
-			"keywords": ["author", "bio", "about"],
+			"title": "关于作者",
+			"description": "放在文章或页面里的短介绍",
+			"keywords": [
+				"author",
+				"bio",
+				"about"
+			],
 			"source": "theme",
 			"content": [
 				{
 					"_type": "block",
 					"style": "normal",
+					"_key": "k0",
 					"children": [
 						{
 							"_type": "span",
-							"text": "A software developer who writes about building things on the web. Based somewhere with good coffee and reliable internet.",
-							"_key": "k1"
+							"_key": "k1",
+							"text": "keveon 做工具，也写一点东西。邮件、AI、门户和生活里的小站，分开长，在这里碰头。"
 						}
-					],
-					"_key": "k0"
+					]
 				}
 			]
 		}
@@ -281,31 +540,44 @@
 				"slug": "about",
 				"status": "published",
 				"data": {
+					"title": "关于",
+					"content": [
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "k0",
+							"children": [
+								{
+									"_type": "span",
+									"_key": "k1",
+									"text": "这里是 keveon 的名片。作品各自有自己的域名，文章记在动手的间隙里。没有更新日程，写到了就放上来。"
+								}
+							]
+						}
+					]
+				},
+				"locale": "zh"
+			},
+			{
+				"id": "about-en",
+				"slug": "about",
+				"locale": "en",
+				"translationOf": "about",
+				"status": "published",
+				"data": {
 					"title": "About",
 					"content": [
 						{
 							"_type": "block",
 							"style": "normal",
+							"_key": "k0",
 							"children": [
 								{
 									"_type": "span",
-									"text": "A place for writing about software, design, and the occasional stray thought. No posting schedule, no newsletter funnel. Just things I wanted to write down.",
-									"_key": "k1"
+									"_key": "k1",
+									"text": "This is keveon's card. The products live on their own domains. The notes show up when there's something worth writing down."
 								}
-							],
-							"_key": "k0"
-						},
-						{
-							"_type": "block",
-							"style": "normal",
-							"children": [
-								{
-									"_type": "span",
-									"text": "Built with Astro and EmDash. The source is open if you want to see how it works.",
-									"_key": "k3"
-								}
-							],
-							"_key": "k2"
+							]
 						}
 					]
 				}
@@ -411,9 +683,14 @@
 					}
 				],
 				"taxonomies": {
-					"category": ["development"],
-					"tag": ["opinion"]
-				}
+					"category": [
+						"development"
+					],
+					"tag": [
+						"opinion"
+					]
+				},
+				"locale": "zh"
 			},
 			{
 				"id": "post-2",
@@ -498,9 +775,15 @@
 					}
 				],
 				"taxonomies": {
-					"category": ["development"],
-					"tag": ["webdev", "opinion"]
-				}
+					"category": [
+						"development"
+					],
+					"tag": [
+						"webdev",
+						"opinion"
+					]
+				},
+				"locale": "zh"
 			},
 			{
 				"id": "post-3",
@@ -580,9 +863,14 @@
 					]
 				},
 				"taxonomies": {
-					"category": ["notes"],
-					"tag": ["opinion"]
-				}
+					"category": [
+						"notes"
+					],
+					"tag": [
+						"opinion"
+					]
+				},
+				"locale": "zh"
 			},
 			{
 				"id": "post-4",
@@ -662,9 +950,14 @@
 					]
 				},
 				"taxonomies": {
-					"category": ["development"],
-					"tag": ["tools"]
-				}
+					"category": [
+						"development"
+					],
+					"tag": [
+						"tools"
+					]
+				},
+				"locale": "zh"
 			},
 			{
 				"id": "post-5",
@@ -744,9 +1037,14 @@
 					]
 				},
 				"taxonomies": {
-					"category": ["design"],
-					"tag": ["creativity"]
-				}
+					"category": [
+						"design"
+					],
+					"tag": [
+						"creativity"
+					]
+				},
+				"locale": "zh"
 			},
 			{
 				"id": "post-6",
@@ -826,9 +1124,14 @@
 					]
 				},
 				"taxonomies": {
-					"category": ["development"],
-					"tag": ["creativity"]
-				}
+					"category": [
+						"development"
+					],
+					"tag": [
+						"creativity"
+					]
+				},
+				"locale": "zh"
 			},
 			{
 				"id": "post-7",
@@ -908,9 +1211,14 @@
 					]
 				},
 				"taxonomies": {
-					"category": ["notes"],
-					"tag": ["opinion"]
-				}
+					"category": [
+						"notes"
+					],
+					"tag": [
+						"opinion"
+					]
+				},
+				"locale": "zh"
 			},
 			{
 				"id": "post-draft",
@@ -933,8 +1241,153 @@
 							"_key": "k0"
 						}
 					]
+				},
+				"locale": "zh"
+			}
+		],
+		"products": [
+			{
+				"id": "product-hqbase",
+				"slug": "hqbase",
+				"locale": "zh",
+				"status": "published",
+				"data": {
+					"title": "HQBase",
+					"summary": "自托管收件箱。把邮件收回到自己的域名。",
+					"url": "https://mail.keveon.com",
+					"availability": "active",
+					"order": 0,
+					"features": [
+						{
+							"_type": "feature",
+							"_version": 1,
+							"_key": "hqbase-domain",
+							"title": "自己的域名",
+							"desc": "任意地址 @keveon.com，收发都是你的。",
+							"icon": "@"
+						},
+						{
+							"_type": "feature",
+							"_version": 1,
+							"_key": "hqbase-inbox",
+							"title": "干净的收件箱",
+							"desc": "重要的信留在眼前，其余安静归档。",
+							"icon": "·"
+						},
+						{
+							"_type": "feature",
+							"_version": 1,
+							"_key": "hqbase-update",
+							"title": "平台托管升级",
+							"desc": "签名发布，设置里一键更新。",
+							"icon": "↑"
+						}
+					],
+					"body": [
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "hqbase-body",
+							"children": [
+								{
+									"_type": "span",
+									"_key": "hqbase-body-span",
+									"text": "HQBase 跑在 Cloudflare Workers 上。信箱跟着域名走，不借别人的品牌收信。"
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"id": "product-hqbase-en",
+				"slug": "hqbase",
+				"locale": "en",
+				"translationOf": "product-hqbase",
+				"status": "published",
+				"data": {
+					"title": "HQBase",
+					"summary": "A self-hosted inbox. Mail comes back to your own domain.",
+					"url": "https://mail.keveon.com",
+					"availability": "active",
+					"order": 0,
+					"features": [
+						{
+							"_type": "feature",
+							"_version": 1,
+							"_key": "hqbase-domain-en",
+							"title": "Your domain",
+							"desc": "Any address at your domain, both ways.",
+							"icon": "@"
+						},
+						{
+							"_type": "feature",
+							"_version": 1,
+							"_key": "hqbase-inbox-en",
+							"title": "A quiet inbox",
+							"desc": "What matters stays in front. The rest files itself.",
+							"icon": "·"
+						},
+						{
+							"_type": "feature",
+							"_version": 1,
+							"_key": "hqbase-update-en",
+							"title": "Signed updates",
+							"desc": "Publish a release, then update from settings.",
+							"icon": "↑"
+						}
+					],
+					"body": [
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "hqbase-body-en",
+							"children": [
+								{
+									"_type": "span",
+									"_key": "hqbase-body-en-span",
+									"text": "HQBase runs on Cloudflare Workers. The mailbox follows the domain, instead of borrowing someone else's brand."
+								}
+							]
+						}
+					]
 				}
 			}
 		]
-	}
+	},
+	"defaultLocale": "zh",
+	"blockTypes": [
+		{
+			"slug": "feature",
+			"label": "Feature",
+			"description": "One capability on a product page.",
+			"currentVersion": 1,
+			"versions": [
+				{
+					"version": 1,
+					"fields": [
+						{
+							"slug": "title",
+							"label": "Title",
+							"type": "string",
+							"required": true
+						},
+						{
+							"slug": "desc",
+							"label": "Description",
+							"type": "text"
+						},
+						{
+							"slug": "icon",
+							"label": "Icon",
+							"type": "string",
+							"validation": {
+								"maxLength": 16
+							}
+						}
+					]
+				}
+			]
+		}
+	]
 }

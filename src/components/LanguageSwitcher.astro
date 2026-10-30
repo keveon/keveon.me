@@ -1,0 +1,81 @@
+---
+import { asLocale } from "../i18n/ui";
+import { t } from "../i18n/ui";
+import { localeHref, stripLocale } from "../utils/routing";
+
+interface Props {
+	/** Explicit paths for published translations. Missing locales fall back to the same path. */
+	alternates?: Partial<Record<"zh" | "en", string>>;
+}
+
+const locale = asLocale(Astro.currentLocale);
+const copy = t(locale);
+const bare = stripLocale(Astro.url.pathname);
+const search = Astro.url.search;
+const zhHref = Astro.props.alternates?.zh ?? `${localeHref("zh", bare)}${search}`;
+const enHref = Astro.props.alternates?.en ?? `${localeHref("en", bare)}${search}`;
+---
+
+<nav class="lang-switch" aria-label={copy.language}>
+	<a
+		href={zhHref}
+		hreflang="zh"
+		lang="zh"
+		data-locale-choice="zh"
+		aria-current={locale === "zh" ? "true" : undefined}
+	>
+		中文
+	</a>
+	<a
+		href={enHref}
+		hreflang="en"
+		lang="en"
+		data-locale-choice="en"
+		aria-current={locale === "en" ? "true" : undefined}
+	>
+		EN
+	</a>
+</nav>
+
+<script>
+	// Remember the choice only. Nothing on the server redirects from this cookie
+	// or from Accept-Language — the URL is the locale.
+	function persistLocale(value: string) {
+		try {
+			localStorage.setItem("locale", value);
+		} catch {
+			// Private mode can reject storage. The cookie still records the choice.
+		}
+		const secure = location.protocol === "https:" ? "; Secure" : "";
+		document.cookie = `locale=${encodeURIComponent(value)}; path=/; max-age=31536000; SameSite=Lax${secure}`;
+	}
+
+	document.querySelectorAll<HTMLAnchorElement>("[data-locale-choice]").forEach((link) => {
+		link.addEventListener("click", () => {
+			const value = link.dataset.localeChoice;
+			if (value === "zh" || value === "en") persistLocale(value);
+		});
+	});
+</script>
+
+<style>
+	.lang-switch {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.7rem;
+		font-size: 13px;
+		line-height: 1;
+	}
+
+	.lang-switch a {
+		color: var(--color-muted);
+		font-weight: 500;
+		letter-spacing: 0.01em;
+		text-decoration: none;
+	}
+
+	.lang-switch a:hover,
+	.lang-switch a[aria-current="true"] {
+		color: var(--color-text);
+	}
+</style>

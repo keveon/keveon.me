@@ -3,6 +3,7 @@ import {
 	getEmDashEntry,
 	getEmDashCollection,
 	getTermsForEntries,
+	getTranslations,
 	getSeoMeta,
 	decodeSlug,
 	getSiteSettings,
@@ -12,21 +13,25 @@ import { Comments, CommentForm } from "emdash/ui/comments";
 import Base from "../../layouts/Base.astro";
 import Byline from "../../components/Byline.astro";
 import PostCard from "../../components/PostCard.astro";
+import { t, readingMinutes } from "../../i18n/ui";
 import { formatDate } from "../../utils/locale";
 import { getReadingTime } from "../../utils/reading-time";
+import { localeHref, notFoundPath } from "../../utils/routing";
 import { resolveBlogSiteIdentity } from "../../utils/site-identity";
 import "../../styles/prose.css";
 
 const slug = decodeSlug(Astro.params.slug);
 
 if (!slug) {
-	return Astro.rewrite("/404");
+	return Astro.rewrite(notFoundPath(Astro.currentLocale));
 }
 
-const { entry: post, cacheHint } = await getEmDashEntry("posts", slug);
+const { entry: post, cacheHint } = await getEmDashEntry("posts", slug, {
+	locale: Astro.currentLocale,
+});
 
 if (!post) {
-	return Astro.rewrite("/404");
+	return Astro.rewrite(notFoundPath(Astro.currentLocale));
 }
 
 if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
@@ -76,6 +81,7 @@ const tags = post.data.terms?.tag ?? [];
 // Fetch a few extra recent posts in case the current post is among them.
 const { entries: recentPosts, cacheHint: recentPostsCacheHint } =
 	await getEmDashCollection("posts", {
+		locale: Astro.currentLocale,
 		orderBy: { published_at: "desc" },
 		limit: 4,
 	});
@@ -88,6 +94,7 @@ const otherTagsByEntry = await getTermsForEntries(
 	"posts",
 	otherPosts.map((p) => p.data.id),
 	"tag",
+	{ locale: Astro.currentLocale },
 );
 const otherPostsWithTags = otherPosts.map((p) => ({
 	post: p,
@@ -98,7 +105,19 @@ const otherPostsWithTags = otherPosts.map((p) => ({
 }));
 
 const publishedAt = post.data.publishedAt ?? null;
-const publishDate = publishedAt ? formatDate(publishedAt, "long") : null;
+const copy = t(Astro.currentLocale);
+const postsHref = localeHref(Astro.currentLocale, "/posts");
+const publishDate = publishedAt ? formatDate(publishedAt, "long", Astro.currentLocale) : null;
+const readingLabel = readingMinutes(Astro.currentLocale, readingTime);
+
+const { translations } = await getTranslations("posts", post.data.id);
+const alternates: Partial<Record<"zh" | "en", string>> = {};
+for (const translation of translations) {
+	if (translation.status !== "published" || !translation.slug) continue;
+	if (translation.locale === "zh" || translation.locale === "en") {
+		alternates[translation.locale] = localeHref(translation.locale, `/posts/${translation.slug}`);
+	}
+}
 
 // The script below builds the table of contents and has the final say; this
 // guess keeps the sidebar from shifting when the page loads.
@@ -121,12 +140,13 @@ const hasHeadings = (post.data.content ?? []).some(
 	publishedTime={post.data.publishedAt?.toISOString() ?? null}
 	modifiedTime={post.data.updatedAt.toISOString()}
 	content={{ collection: "posts", id: post.data.id, slug }}
+	alternates={alternates}
 >
 	<article class="post">
 		<header class="intro post-header">
 			<div class="frame">
 				<div class="post-header__inner">
-					<a href="/posts" class="arrow-link back-link">
+					<a href={postsHref} class="arrow-link back-link">
 						<svg
 							viewBox="0 0 24 24"
 							fill="none"
@@ -139,15 +159,15 @@ const hasHeadings = (post.data.content ?? []).some(
 							<path d="M19 12H5"></path>
 							<path d="m12 19-7-7 7-7"></path>
 						</svg>
-						All posts
+						{copy.allPosts}
 					</a>
 					{
 						tags.length > 0 && (
-							<ul class="chips post-header__tags" aria-label="Tags">
-								{tags.map((t) => (
+							<ul class="chips post-header__tags" aria-label={copy.tags}>
+								{tags.map((tag) => (
 									<li>
-										<a href={`/tag/${t.slug}`} class="chip">
-											{t.label}
+										<a href={localeHref(Astro.currentLocale, `/tag/${tag.slug}`)} class="chip">
+											{tag.label}
 										</a>
 									</li>
 								))}
@@ -174,7 +194,7 @@ const hasHeadings = (post.data.content ?? []).some(
 									</time>
 								)
 							}
-							<span>{readingTime} min read</span>
+							<span>{readingLabel}</span>
 						</p>
 					</div>
 				</div>
@@ -205,7 +225,7 @@ const hasHeadings = (post.data.content ?? []).some(
 							bylines.length > 0 && (
 								<div class="post-fact">
 									<dt class="eyebrow">
-										{bylines.length === 1 ? "Author" : "Authors"}
+										{bylines.length === 1 ? copy.author : copy.authors}
 									</dt>
 									<dd>
 										<Byline bylines={bylines} layout="list" />
@@ -216,7 +236,7 @@ const hasHeadings = (post.data.content ?? []).some(
 						{
 							publishedAt && (
 								<div class="post-fact">
-									<dt class="eyebrow">Published</dt>
+									<dt class="eyebrow">{copy.published}</dt>
 									<dd>
 										<time datetime={publishedAt.toISOString()}>
 											{publishDate}
@@ -226,8 +246,8 @@ const hasHeadings = (post.data.content ?? []).some(
 							)
 						}
 						<div class="post-fact">
-							<dt class="eyebrow">Reading time</dt>
-							<dd>{readingTime} min</dd>
+							<dt class="eyebrow">{copy.readingTime}</dt>
+							<dd>{readingLabel}</dd>
 						</div>
 					</dl>
 				</div>
@@ -238,7 +258,7 @@ const hasHeadings = (post.data.content ?? []).some(
 					</div>
 
 					<section class="post-comments" aria-labelledby="comments-title">
-						<h2 id="comments-title" class="eyebrow">Discussion</h2>
+						<h2 id="comments-title" class="eyebrow">{copy.discussion}</h2>
 						<Comments collection="posts" contentId={post.data.id} threaded />
 						<CommentForm collection="posts" contentId={post.data.id} />
 					</section>
@@ -251,12 +271,12 @@ const hasHeadings = (post.data.content ?? []).some(
 						hidden={!hasHeadings}
 						data-toc
 					>
-						<h2 id="toc-title" class="eyebrow">On this page</h2>
+						<h2 id="toc-title" class="eyebrow">{copy.onThisPage}</h2>
 						<ol class="toc__list" data-toc-list></ol>
 					</nav>
 
 					<aside class="post-widgets" aria-labelledby="widgets-title">
-						<h2 id="widgets-title" class="sr-only">More from the blog</h2>
+						<h2 id="widgets-title" class="sr-only">{copy.moreFrom}</h2>
 						<WidgetArea name="sidebar" />
 					</aside>
 				</div>
@@ -270,10 +290,10 @@ const hasHeadings = (post.data.content ?? []).some(
 				<div class="frame related">
 					<div class="section-head">
 						<h2 id="continue-reading" class="section-head__title">
-							Continue reading
+							{copy.continueReading}
 						</h2>
-						<a href="/posts" class="arrow-link">
-							All posts
+						<a href={postsHref} class="arrow-link">
+							{copy.allPosts}
 							<svg
 								viewBox="0 0 24 24"
 								fill="none"

@@ -3,15 +3,24 @@ export const prerender = false;
 
 import { search } from "emdash";
 import Base from "../layouts/Base.astro";
+import { noResultsTitle, resultCount, searchDocumentTitle, t } from "../i18n/ui";
+import { entryPath, localeHref } from "../utils/routing";
 
+const copy = t(Astro.currentLocale);
 const query = Astro.url.searchParams.get("q")?.trim() || "";
+const searchAction = localeHref(Astro.currentLocale, "/search");
+const postsHref = localeHref(Astro.currentLocale, "/posts");
 
 // Use the FTS-backed search() API instead of loading every post and
 // filtering in JS. FTS scales as the post count grows, returns ranked
 // results, and handles tokenization/stemming. Templates that grep all
 // post bodies in JS quickly become unusable past a few hundred posts.
 const { items: results, nextCursor } = query
-	? await search(query, { collections: ["posts"], limit: 30 })
+	? await search(query, {
+			collections: ["posts", "pages", "products"],
+			locale: Astro.currentLocale,
+			limit: 30,
+		})
 	: { items: [], nextCursor: undefined };
 
 function escapeHtml(text: string) {
@@ -27,39 +36,41 @@ function escapeHtml(text: string) {
 // title. When it is the whole title, show its highlights in the heading
 // instead of repeating the title underneath.
 const rows = results.map((result) => {
-	const title = result.title ?? "Untitled";
+	const title = result.title ?? copy.untitled;
 	const snippetIsTitle =
 		result.snippet?.replaceAll("<mark>", "").replaceAll("</mark>", "") ===
 		escapeHtml(title);
+	const collection =
+		result.collection === "products" || result.collection === "pages"
+			? result.collection
+			: "posts";
 	return {
-		path: `/posts/${result.slug ?? result.id}`,
+		path: entryPath(result.locale ?? Astro.currentLocale, collection, result.slug ?? result.id),
 		title,
 		titleHtml: snippetIsTitle ? result.snippet : undefined,
 		snippet: snippetIsTitle ? undefined : result.snippet,
 	};
 });
 
-const countLabel = nextCursor
-	? `Top ${rows.length} results`
-	: `${rows.length} ${rows.length === 1 ? "result" : "results"}`;
+const countLabel = resultCount(Astro.currentLocale, rows.length, Boolean(nextCursor));
 ---
 
 <Base
-	title={query ? `Search: ${query}` : "Search"}
-	description="Search blog posts"
+	title={searchDocumentTitle(Astro.currentLocale, query)}
+	description={copy.searchDescription}
 >
 	<header class="band intro">
 		<div class="frame">
-			<p class="eyebrow">Search</p>
-			<h1 class="intro__title">What are you looking for?</h1>
+			<p class="eyebrow">{copy.search}</p>
+			<h1 class="intro__title">{copy.searchTitle}</h1>
 			<form
 				method="get"
-				action="/search"
+				action={searchAction}
 				role="search"
-				aria-label="Posts"
+				aria-label={copy.searchLabel}
 				class="search-form"
 			>
-				<label for="search-query" class="sr-only">Search posts</label>
+				<label for="search-query" class="sr-only">{copy.search}</label>
 				<div class="search-field">
 					<svg
 						class="search-field__icon"
@@ -79,17 +90,17 @@ const countLabel = nextCursor
 						type="search"
 						name="q"
 						value={query}
-						placeholder="Search posts"
+						placeholder={copy.searchPlaceholder}
 						autofocus={!query}
 					/>
-					<button type="submit" class="btn search-field__submit">Search</button>
+					<button type="submit" class="btn search-field__submit">{copy.search}</button>
 				</div>
 			</form>
 			{
 				!query && (
 					<p class="search-hint">
-						Searches post titles and full text. Not sure where to start?{" "}
-						<a href="/posts">Browse all posts</a>.
+						{copy.searchHintBefore}{" "}
+						<a href={postsHref}>{copy.searchHintLink}</a>{copy.searchHintAfter}
 					</p>
 				)
 			}
@@ -104,10 +115,10 @@ const countLabel = nextCursor
 						<>
 							<div class="section-head">
 								<p class="search-summary">
-									<strong>{countLabel}</strong> for “{query}”
+									<strong>{countLabel}</strong> {copy.resultFor} “{query}”
 								</p>
-								<a href="/posts" class="arrow-link">
-									All posts
+								<a href={postsHref} class="arrow-link">
+									{copy.allPosts}
 									<svg
 										viewBox="0 0 24 24"
 										fill="none"
@@ -161,14 +172,11 @@ const countLabel = nextCursor
 						</>
 					) : (
 						<div class="empty-state">
-							<h2 class="empty-state__title">No results for “{query}”</h2>
-							<p class="empty-state__text">
-								Check the spelling, try fewer or different words, or browse
-								every post instead.
-							</p>
+							<h2 class="empty-state__title">{noResultsTitle(Astro.currentLocale, query)}</h2>
+							<p class="empty-state__text">{copy.noResultsLead}</p>
 							<div class="empty-state__actions">
-								<a href="/posts" class="btn btn--ghost">
-									Browse all posts
+								<a href={postsHref} class="btn btn--ghost">
+									{copy.browsePosts}
 								</a>
 							</div>
 						</div>

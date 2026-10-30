@@ -1,0 +1,103 @@
+---
+interface Props {
+	value: {
+		_type: string;
+		_version: number;
+		_key: string;
+		title?: string;
+		desc?: string;
+		icon?: string;
+	};
+	index: number;
+	blockKey: string;
+}
+
+const { value, index = 0 } = Astro.props;
+const tone = index % 6;
+---
+
+<article class:list={["feature", `feature--tone-${tone}`]}>
+	<div class="feature__plate" aria-hidden="true">
+		{value.icon && <span class="feature__icon">{value.icon}</span>}
+	</div>
+	<div class="feature__body">
+		{value.title && <h3 class="feature__title">{value.title}</h3>}
+		{value.desc && <p class="feature__desc">{value.desc}</p>}
+	</div>
+</article>
+
+<style>
+	.feature {
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+		border: 1px solid var(--color-border);
+		border-radius: 22px;
+		background: var(--color-surface);
+		box-shadow: var(--shadow-card);
+	}
+
+	.feature__plate {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 170px;
+		padding: 1.25rem;
+	}
+
+	.feature--tone-0 .feature__plate {
+		background: linear-gradient(160deg, #e8eef5, #c9d7e8);
+	}
+	.feature--tone-1 .feature__plate {
+		background: linear-gradient(165deg, #ede8f7, #c9bbe6);
+	}
+	.feature--tone-2 .feature__plate {
+		background: linear-gradient(160deg, #e7f0ec, #d3e5dc);
+	}
+	.feature--tone-3 .feature__plate {
+		background: linear-gradient(165deg, #f8ede4, #e8c4a8);
+	}
+	.feature--tone-4 .feature__plate {
+		background: linear-gradient(160deg, #eceae6, #ddd9d2);
+	}
+	.feature--tone-5 .feature__plate {
+		background: linear-gradient(160deg, #e4e8ec, #cfd6de);
+	}
+
+	:root.dark .feature__plate {
+		background: radial-gradient(at 40% 30%, #2a3548, #12151c);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root:not(.light) .feature__plate {
+			background: radial-gradient(at 40% 30%, #2a3548, #12151c);
+		}
+	}
+
+	.feature__icon {
+		font-size: 1.75rem;
+		font-weight: 600;
+		letter-spacing: -0.03em;
+		color: var(--color-brand);
+	}
+
+	.feature__body {
+		display: grid;
+		gap: 0.35rem;
+		padding: 1.15rem 1.25rem 1.3rem;
+	}
+
+	.feature__title {
+		margin: 0;
+		font-size: 1.05rem;
+		font-weight: 600;
+		letter-spacing: -0.02em;
+	}
+
+	.feature__desc {
+		margin: 0;
+		color: var(--color-text-secondary);
+		font-size: 0.92rem;
+		line-height: 1.55;
+	}
+</style>

@@ -1,0 +1,15 @@
+---
+import { decodeSlug, getEmDashEntry } from "emdash";
+import Page from "../../pages/[slug].astro";
+import { notFoundPath } from "../../../utils/routing";
+
+const slug = decodeSlug(Astro.params.slug);
+if (!slug) return Astro.rewrite(notFoundPath(Astro.currentLocale));
+
+const { entry } = await getEmDashEntry("pages", slug, {
+	locale: Astro.currentLocale,
+});
+if (!entry) return Astro.rewrite(notFoundPath(Astro.currentLocale));
+---
+
+<Page />

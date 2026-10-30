@@ -8,15 +8,19 @@ import {
 import Base from "../../layouts/Base.astro";
 import PostCard from "../../components/PostCard.astro";
 import Pagination from "../../components/Pagination.astro";
+import { postsInLead, t } from "../../i18n/ui";
+import { localeHref, notFoundPath } from "../../utils/routing";
 
 const slug = decodeSlug(Astro.params.slug);
+const copy = t(Astro.currentLocale);
 const termsResult = await getTaxonomyTermsWithCacheHint("tag", {
 	includeCounts: false,
+	locale: Astro.currentLocale,
 });
 const term = slug ? termsResult.data.find((item) => item.slug === slug) : null;
 
 if (!term) {
-	return Astro.rewrite("/404");
+	return Astro.rewrite(notFoundPath(Astro.currentLocale));
 }
 
 const cursor = Astro.url.searchParams.get("cursor") || undefined;
@@ -25,6 +29,7 @@ const {
 	cacheHint,
 	nextCursor,
 } = await getEmDashCollection("posts", {
+	locale: Astro.currentLocale,
 	where: { tag: term.slug },
 	orderBy: { published_at: "desc" },
 	limit: 20,
@@ -42,7 +47,10 @@ const tagsByEntry = await getTermsForEntries(
 	"posts",
 	posts.map((p) => p.data.id),
 	"tag",
+	{ locale: Astro.currentLocale },
 );
+const archiveHref = localeHref(Astro.currentLocale, "/posts");
+const tagHref = localeHref(Astro.currentLocale, `/tag/${term.slug}`);
 const filteredPosts = posts.map((post) => ({
 	post,
 	tags: (tagsByEntry.get(post.data.id) ?? []).filter(
@@ -51,21 +59,18 @@ const filteredPosts = posts.map((post) => ({
 }));
 ---
 
-<Base
-	title={`Posts tagged "${term.label}"`}
-	description={`All posts tagged with ${term.label}`}
->
+<Base title={term.label} description={postsInLead(Astro.currentLocale, term.label, term.description)}>
 	<header class="band intro">
 		<div class="frame archive-intro">
 			<div class="archive-intro__text">
-				<p class="eyebrow">Tag</p>
+				<p class="eyebrow">{copy.tag}</p>
 				<h1 class="intro__title">{term.label}</h1>
 				<p class="intro__lead">
-					{term.description || `Posts tagged ${term.label}, newest first.`}
+					{postsInLead(Astro.currentLocale, term.label, term.description)}
 				</p>
 			</div>
-			<a href="/posts" class="arrow-link">
-				All posts
+			<a href={archiveHref} class="arrow-link">
+				{copy.allPosts}
 				<svg
 					viewBox="0 0 24 24"
 					fill="none"
@@ -96,7 +101,7 @@ const filteredPosts = posts.map((post) => ({
 							))}
 						</div>
 						<Pagination
-							basePath={`/tag/${term.slug}`}
+							basePath={tagHref}
 							cursor={cursor}
 							nextCursor={nextCursor}
 						/>
@@ -104,19 +109,14 @@ const filteredPosts = posts.map((post) => ({
 				) : (
 					<div class="empty-state">
 						<h2 class="empty-state__title">
-							{cursor ? "No more posts" : "Nothing here yet"}
+							{cursor ? copy.noMorePosts : copy.nothingHere}
 						</h2>
 						<p class="empty-state__text">
-							{cursor
-								? "This page is past the last post."
-								: `No posts have been tagged ${term.label} so far.`}
+							{cursor ? copy.pastLast : postsInLead(Astro.currentLocale, term.label)}
 						</p>
 						<div class="empty-state__actions">
-							<a
-								href={cursor ? `/tag/${term.slug}` : "/posts"}
-								class="btn btn--ghost"
-							>
-								{cursor ? "Back to the first page" : "Browse all posts"}
+							<a href={cursor ? tagHref : archiveHref} class="btn btn--ghost">
+								{cursor ? copy.backToStart : copy.browsePosts}
 							</a>
 						</div>
 					</div>

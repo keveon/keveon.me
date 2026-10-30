@@ -1,24 +1,24 @@
-import { getI18nConfig } from "emdash";
+import { asLocale } from "../i18n/ui";
 
 /**
- * The default locale from the site's Astro `i18n` config, if it names a
- * language this runtime can format. Callers fall back to English when it's
- * undefined.
+ * BCP 47 tag for date formatting. Chinese is the default locale of the site.
  */
-export function getSiteLocale(): string | undefined {
-	const locale = getI18nConfig()?.defaultLocale;
-	if (!locale) return undefined;
-	try {
-		return Intl.DateTimeFormat.supportedLocalesOf(locale)[0];
-	} catch {
-		// Malformed tags such as "pt_BR" throw instead of matching nothing.
-		return undefined;
-	}
+export function dateLocale(locale: string | undefined | null): string {
+	return asLocale(locale) === "en" ? "en-US" : "zh-CN";
 }
 
-/** Formats a date in the site's locale, or in US English without one. */
-export function formatDate(date: Date, month: "long" | "short"): string {
-	return date.toLocaleDateString(getSiteLocale() ?? "en-US", {
+/** @deprecated Prefer dateLocale(Astro.currentLocale). Kept for callers that have no request locale. */
+export function getSiteLocale(): string {
+	return "zh-CN";
+}
+
+/** Formats a date in the active locale. */
+export function formatDate(
+	date: Date,
+	month: "long" | "short",
+	locale?: string | null,
+): string {
+	return date.toLocaleDateString(dateLocale(locale), {
 		year: "numeric",
 		month,
 		day: "numeric",

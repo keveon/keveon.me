@@ -2,24 +2,28 @@
 import {
 	getEmDashEntry,
 	getSeoMeta,
+	getTranslations,
 	decodeSlug,
 	getSiteSettings,
 } from "emdash";
 import { PortableText } from "emdash/ui";
 import Base from "../../layouts/Base.astro";
+import { localeHref, notFoundPath } from "../../utils/routing";
 import { resolveBlogSiteIdentity } from "../../utils/site-identity";
 import "../../styles/prose.css";
 
 const slug = decodeSlug(Astro.params.slug);
 
 if (!slug) {
-	return Astro.rewrite("/404");
+	return Astro.rewrite(notFoundPath(Astro.currentLocale));
 }
 
-const { entry: page, cacheHint } = await getEmDashEntry("pages", slug);
+const { entry: page, cacheHint } = await getEmDashEntry("pages", slug, {
+	locale: Astro.currentLocale,
+});
 
 if (!page) {
-	return Astro.rewrite("/404");
+	return Astro.rewrite(notFoundPath(Astro.currentLocale));
 }
 
 if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
@@ -29,6 +33,15 @@ const seo = getSeoMeta(page, {
 	siteUrl: Astro.url.origin,
 	path: Astro.url.pathname.replace(/\/$/, ""),
 });
+
+const { translations } = await getTranslations("pages", page.data.id);
+const alternates: Partial<Record<"zh" | "en", string>> = {};
+for (const translation of translations) {
+	if (translation.status !== "published" || !translation.slug) continue;
+	if (translation.locale === "zh" || translation.locale === "en") {
+		alternates[translation.locale] = localeHref(translation.locale, `/pages/${translation.slug}`);
+	}
+}
 ---
 
 <Base
@@ -38,6 +51,7 @@ const seo = getSeoMeta(page, {
 	canonical={seo.canonical}
 	robots={seo.robots}
 	content={{ collection: "pages", id: page.data.id, slug }}
+	alternates={alternates}
 >
 	<article class="band page">
 		<div class="frame page__layout">

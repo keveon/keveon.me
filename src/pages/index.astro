@@ -1,194 +1,308 @@
 ---
-import {
-	getEmDashCollection,
-	getTermsForEntries,
-	getSiteSettings,
-} from "emdash";
+import { getEmDashCollection, getSiteSettings } from "emdash";
 import Base from "../layouts/Base.astro";
-import PostCard from "../components/PostCard.astro";
+import ProductCard from "../components/ProductCard.astro";
+import { t } from "../i18n/ui";
+import { formatDate } from "../utils/locale";
+import { contentSlug, entryPath, localeHref } from "../utils/routing";
 import { resolveBlogSiteIdentity } from "../utils/site-identity";
 
-// Limit to what we render (1 featured + 6 grid). The DB does the slicing
-// instead of fetching every post and discarding the tail in JS.
-const POSTS_PER_PAGE = 7;
+const copy = t(Astro.currentLocale);
+const [{ entries: products, cacheHint: productsHint }, { entries: posts, cacheHint: postsHint }, settings] =
+	await Promise.all([
+		getEmDashCollection("products", { locale: Astro.currentLocale, limit: 24 }),
+		getEmDashCollection("posts", {
+			locale: Astro.currentLocale,
+			orderBy: { published_at: "desc" },
+			limit: 3,
+		}),
+		getSiteSettings(),
+	]);
+if (Astro.cache?.enabled) {
+	Astro.cache.set(productsHint);
+	Astro.cache.set(postsHint);
+}
 
-const [{ entries: posts, cacheHint }, settings] = await Promise.all([
-	getEmDashCollection("posts", {
-		orderBy: { published_at: "desc" },
-		limit: POSTS_PER_PAGE + 1, // +1 to detect "view all" need
-	}),
-	getSiteSettings(),
-]);
-const { siteTitle, siteTagline } = resolveBlogSiteIdentity(settings);
-
-if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
-
-// Trim the lookahead post used to detect overflow
-const visiblePosts = posts.slice(0, POSTS_PER_PAGE);
-const hasMorePosts = posts.length > POSTS_PER_PAGE;
-
-// Find the first post with a featured image for the hero
-const featuredPost = visiblePosts.find((p) => p.data.featured_image);
-const featuredIndex = featuredPost ? visiblePosts.indexOf(featuredPost) : -1;
-
-// Get remaining posts (exclude featured if found, limit to 6 for grid)
-const gridPosts = visiblePosts
-	.filter((_, i) => i !== featuredIndex)
-	.slice(0, 6);
-
-// Single batched query for tags across the featured post + grid posts.
-// Avoids the N+1 pattern of calling getEntryTerms() per entry.
-// Bylines are already hydrated on entry.data.bylines by getEmDashCollection.
-const tagEntryIds = [
-	...(featuredPost ? [featuredPost.data.id] : []),
-	...gridPosts.map((p) => p.data.id),
-];
-const tagsByEntry = await getTermsForEntries("posts", tagEntryIds, "tag");
-
-const featuredTags = featuredPost
-	? (tagsByEntry.get(featuredPost.data.id) ?? []).map((t) => ({
-			slug: t.slug,
-			label: t.label,
-		}))
-	: [];
-
-const gridPostsWithTags = gridPosts.map((post) => ({
-	post,
-	tags: (tagsByEntry.get(post.data.id) ?? []).map((t) => ({
-		slug: t.slug,
-		label: t.label,
-	})),
-}));
+const ordered = [...products].sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0));
+const featured = ordered[0];
+const rest = ordered.slice(1);
+const spans = ["span-7", "span-5", "span-4", "span-4", "span-4"];
+const { siteTagline } = resolveBlogSiteIdentity(settings);
+const notesHref = localeHref(Astro.currentLocale, "/posts");
+const worksHref = localeHref(Astro.currentLocale, "/products");
 ---
 
-<Base title={siteTitle} description={siteTagline}>
-	<header class="band intro">
-		<div class="frame home-intro">
-			<div>
-				<p class="eyebrow">Blog</p>
-				<h1 class="intro__title">{siteTitle}</h1>
-				{siteTagline && <p class="intro__subtitle">{siteTagline}</p>}
-			</div>
-			<a
-				href="/rss.xml"
-				type="application/rss+xml"
-				class="btn btn--ghost btn--sm home-intro__rss"
-			>
-				<svg
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="1.75"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					aria-hidden="true"
-				>
-					<path d="M4 11a9 9 0 0 1 9 9"></path>
-					<path d="M4 4a16 16 0 0 1 16 16"></path>
-					<circle cx="5" cy="19" r="1"></circle>
-				</svg>
-				RSS feed
-			</a>
-		</div>
+<Base title={copy.homeDocumentTitle} description={siteTagline || copy.homeLead}>
+	<header class="hub-hero">
+		<p class="hub-eyebrow">{copy.homeEyebrow}</p>
+		<h1>{copy.homeTitle}</h1>
+		<p class="hub-lead">{copy.homeLead}</p>
 	</header>
 
 	{
-		posts.length === 0 ? (
-			<section class="band section">
-				<div class="frame">
-					<div class="empty-state">
-						<h2 class="empty-state__title">No posts yet</h2>
-						<p class="empty-state__text">
-							Create your first post in the admin panel.
-						</p>
-						<div class="empty-state__actions">
-							<a href="/_emdash/admin/content/posts/new" class="btn">
-								Create a post
-							</a>
-						</div>
-					</div>
-				</div>
+		featured && (
+			<section class="hub-block" aria-labelledby="featured-work">
+				<h2 id="featured-work" class="section-label">
+					{copy.featured}
+				</h2>
+				<ProductCard product={featured} variant="feature" tone={0} headingLevel={2} priority />
 			</section>
-		) : (
-			<>
-				{featuredPost && (
-					<section class="band section">
-						<div class="frame">
-							<PostCard
-								post={featuredPost}
-								tags={featuredTags}
-								variant="feature"
-								headingLevel={2}
-								priority
-							/>
-						</div>
-					</section>
-				)}
-
-				{gridPostsWithTags.length > 0 && (
-					<section class="band section" aria-labelledby="latest-posts">
-						<div class="frame">
-							<div class="section-head">
-								<h2 id="latest-posts" class="section-head__title">
-									Latest posts
-								</h2>
-								{hasMorePosts && (
-									<a href="/posts" class="arrow-link">
-										View all<span class="sr-only"> posts</span>
-										<svg
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											stroke-width="1.75"
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											aria-hidden="true"
-										>
-											<path d="M5 12h14" />
-											<path d="m12 5 7 7-7 7" />
-										</svg>
-									</a>
-								)}
-							</div>
-							<div class="post-grid">
-								{gridPostsWithTags.map(({ post, tags }) => (
-									<PostCard
-										post={post}
-										tags={tags}
-										variant="card"
-										headingLevel={3}
-									/>
-								))}
-							</div>
-						</div>
-					</section>
-				)}
-			</>
 		)
 	}
+
+	<section class="hub-block" aria-labelledby="all-work">
+		<div class="section-row">
+			<h2 id="all-work" class="section-label">
+				{copy.works}
+			</h2>
+			{
+				rest.length > 0 && (
+					<a class="section-more" href={worksHref}>
+						{copy.viewAll} <span aria-hidden="true">→</span>
+					</a>
+				)
+			}
+		</div>
+		{
+			ordered.length === 0 ? (
+				<div class="hub-empty">
+					<h3>{copy.emptyWorksTitle}</h3>
+					<p>{copy.emptyWorksText}</p>
+					<a class="hub-btn" href="/_emdash/admin/content/products/new">
+						{copy.emptyWorksAction}
+					</a>
+				</div>
+			) : (
+				rest.length > 0 && (
+					<div class="work-grid">
+						{rest.map((product, index) => (
+							<div class:list={["work-grid__item", spans[index % spans.length]]}>
+								<ProductCard product={product} tone={index + 1} headingLevel={3} />
+							</div>
+						))}
+					</div>
+				)
+			)
+		}
+	</section>
+
+	{
+		posts.length > 0 && (
+			<section class="hub-block hub-now" aria-labelledby="now-notes">
+				<div class="section-row">
+					<h2 id="now-notes" class="section-label">
+						{copy.now}
+					</h2>
+					<a class="section-more" href={notesHref}>
+						{copy.viewAll} <span aria-hidden="true">→</span>
+					</a>
+				</div>
+				<div class="now-list">
+					{posts.map((post) => (
+						<a class="now-row" href={entryPath(Astro.currentLocale, "posts", contentSlug(post))}>
+							<div>
+								{post.data.publishedAt && (
+									<time datetime={post.data.publishedAt.toISOString()}>
+										{formatDate(post.data.publishedAt, "short", Astro.currentLocale)}
+									</time>
+								)}
+								<strong {...post.edit.title}>{post.data.title}</strong>
+								{post.data.excerpt && <span {...post.edit.excerpt}>{post.data.excerpt}</span>}
+							</div>
+							<span class="now-chevron" aria-hidden="true">
+								→
+							</span>
+						</a>
+					))}
+				</div>
+			</section>
+		)
+	}
+
+	<section class="hub-about" aria-labelledby="about-keveon">
+		<h2 id="about-keveon" class="section-label">
+			{copy.aboutHeading}
+		</h2>
+		<p>{copy.aboutBlurb}</p>
+	</section>
 </Base>
 
 <style>
-	.home-intro {
+	.hub-hero {
+		max-width: 40rem;
+		padding-block: clamp(4rem, 2.5rem + 4vw, 5rem) 2.5rem;
+	}
+
+	.hub-eyebrow,
+	.section-label {
+		margin: 0;
+		font-size: 13px;
+		font-weight: 500;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		color: var(--color-muted);
+	}
+
+	.hub-eyebrow {
+		margin-bottom: 1rem;
+		font-size: 12px;
+		letter-spacing: 0.18em;
+	}
+
+	.hub-hero h1 {
+		margin: 0;
+		font-size: clamp(2.5rem, 1.2rem + 3.4vw, 3.5rem);
+		font-weight: 600;
+		letter-spacing: -0.04em;
+		line-height: 1.08;
+	}
+
+	.hub-lead,
+	.hub-about p,
+	.hub-empty p {
+		margin: 1rem 0 0;
+		max-width: 38rem;
+		font-size: 1.0625rem;
+		line-height: 1.65;
+		color: var(--color-text-secondary);
+	}
+
+	.hub-block {
+		padding-bottom: clamp(3rem, 2rem + 2vw, 4.5rem);
+	}
+
+	.section-row {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 1rem;
+		margin-bottom: 1.25rem;
+	}
+
+	.section-more {
+		color: var(--color-text-secondary);
+		font-size: 0.9rem;
+		font-weight: 500;
+		text-decoration: none;
+		white-space: nowrap;
+	}
+
+	.section-more:hover {
+		color: var(--color-text);
+	}
+
+	.work-grid {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) auto;
-		align-items: end;
-		gap: var(--spacing-6) var(--spacing-8);
+		grid-template-columns: repeat(12, minmax(0, 1fr));
+		gap: 1.35rem;
 	}
 
-	/* Lifts the pill from the line box's bottom onto the last line's baseline */
-	.home-intro__rss {
-		margin-block-end: var(--spacing-2);
+	.work-grid__item {
+		grid-column: span 12;
+		min-width: 0;
 	}
 
-	@media (max-width: 720px) {
-		.home-intro {
-			grid-template-columns: minmax(0, 1fr);
+	.hub-empty h3 {
+		margin: 0;
+		font-size: 1.5rem;
+	}
+
+	.hub-btn {
+		display: inline-flex;
+		margin-top: 0.85rem;
+		min-height: 2.5rem;
+		align-items: center;
+		padding: 0 1.1rem;
+		border-radius: 999px;
+		background: var(--color-brand);
+		color: var(--color-on-brand);
+		font-size: 0.9rem;
+		font-weight: 500;
+		text-decoration: none;
+	}
+
+	.now-list {
+		border: 1px solid var(--color-border);
+		border-radius: 18px;
+		overflow: hidden;
+		background: color-mix(in srgb, var(--color-surface) 70%, transparent);
+	}
+
+	.now-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: 1.05rem 1.35rem;
+		border-top: 1px solid var(--color-border);
+		color: inherit;
+		text-decoration: none;
+	}
+
+	.now-row:first-child {
+		border-top: 0;
+	}
+
+	.now-row:hover {
+		background: color-mix(in srgb, var(--color-surface) 88%, transparent);
+	}
+
+	.now-row:hover .now-chevron {
+		transform: translateX(3px);
+	}
+
+	.now-row time {
+		display: block;
+		margin-bottom: 0.2rem;
+		font-size: 12px;
+		color: var(--color-muted);
+	}
+
+	.now-row strong {
+		display: block;
+		font-size: 1rem;
+		font-weight: 600;
+		letter-spacing: -0.02em;
+	}
+
+	.now-row span {
+		display: block;
+		margin-top: 0.2rem;
+		color: var(--color-text-secondary);
+		font-size: 0.92rem;
+	}
+
+	.now-chevron {
+		color: var(--color-muted);
+		transition: transform 200ms var(--ease-out);
+	}
+
+	.hub-about {
+		max-width: 36rem;
+		padding-bottom: 4rem;
+	}
+
+	.hub-about .section-label {
+		margin-bottom: 0.25rem;
+	}
+
+	@media (min-width: 640px) {
+		.span-7,
+		.span-5,
+		.span-4 {
+			grid-column: span 6;
 		}
+	}
 
-		.home-intro__rss {
-			justify-self: start;
-			margin-block-end: 0;
+	@media (min-width: 1024px) {
+		.span-7 {
+			grid-column: span 7;
+		}
+		.span-5 {
+			grid-column: span 5;
+		}
+		.span-4 {
+			grid-column: span 4;
 		}
 	}
 </style>

@@ -1,15 +1,15 @@
 ---
 import { getMenuWithCacheHint, getSiteSettingsWithCacheHint } from "emdash";
 import {
-	WidgetArea,
 	EmDashHead,
 	EmDashBodyStart,
 	EmDashBodyEnd,
 } from "emdash/ui";
 import { createPublicPageContext } from "emdash/page";
-import LiveSearch from "emdash/ui/search";
 import { Font } from "astro:assets";
-import { getSiteLocale } from "../utils/locale";
+import LanguageSwitcher from "../components/LanguageSwitcher.astro";
+import { asLocale, t } from "../i18n/ui";
+import { absoluteUrl, localeHref } from "../utils/routing";
 import { resolveBlogSiteIdentity } from "../utils/site-identity";
 import "../styles/tokens.css";
 import "../styles/theme.css";
@@ -27,6 +27,8 @@ interface Props {
 	author?: string | null;
 	/** Pass content reference for plugin page contributions on content pages */
 	content?: { collection: string; id: string; slug?: string | null };
+	/** Published translation paths, used for the switcher and hreflang. */
+	alternates?: Partial<Record<"zh" | "en", string>>;
 }
 
 const {
@@ -41,21 +43,36 @@ const {
 	modifiedTime,
 	author,
 	content,
+	alternates,
 } = Astro.props;
+const locale = asLocale(Astro.currentLocale);
+const copy = t(locale);
 const [settingsResult, menuResult] = await Promise.all([
 	getSiteSettingsWithCacheHint(),
-	getMenuWithCacheHint("primary"),
+	getMenuWithCacheHint("primary", { locale }),
 ]);
 if (Astro.cache?.enabled) {
 	Astro.cache.set(settingsResult.cacheHint);
 	Astro.cache.set(menuResult.cacheHint);
 }
 
-const { siteTitle, siteTagline, siteLogo } = resolveBlogSiteIdentity(
+const { siteTitle, wordmark, email, github } = resolveBlogSiteIdentity(
 	settingsResult.data,
 );
+const homeHref = localeHref(locale, "/");
+const searchHref = localeHref(locale, "/search");
+const rssHref = localeHref(locale, "/rss.xml");
+const barePath = Astro.url.pathname.replace(/\/$/, "") || "/";
+const zhPath = alternates?.zh ?? localeHref("zh", barePath);
+const enPath = alternates?.en ?? localeHref("en", barePath);
+const zhHref = absoluteUrl(Astro.url.origin, zhPath);
+const enHref = absoluteUrl(Astro.url.origin, enPath);
+const socialImage = image || absoluteUrl(Astro.url.origin, "/og.png");
 const titleIncludesSiteName =
 	title === siteTitle ||
+	title === wordmark ||
+	title.startsWith(`${wordmark} —`) ||
+	title.startsWith(`${siteTitle} —`) ||
 	title.endsWith(` | ${siteTitle}`) ||
 	title.endsWith(` — ${siteTitle}`);
 const fullTitle = titleIncludesSiteName ? title : `${title} — ${siteTitle}`;
@@ -73,9 +90,9 @@ const pageCtx = createPublicPageContext({
 	pageTitle: pageTitle ?? title,
 	description,
 	canonical,
-	image,
+	image: socialImage,
 	content,
-	seo: { ogImage: image, robots },
+	seo: { ogImage: socialImage, robots },
 	articleMeta: { publishedTime, modifiedTime, author },
 	siteName: siteTitle,
 });
@@ -102,25 +119,31 @@ function navCurrent(url: string): "page" | "true" | undefined {
 	return undefined;
 }
 
-const lang = getSiteLocale() ?? "en";
-const monogram = [...siteTitle.trim()][0]?.toUpperCase() ?? "";
-const year = new Date().getFullYear();
+const htmlLang = locale === "zh" ? "zh-CN" : "en";
 ---
 
 <!doctype html>
-<html lang={lang}>
+<html lang={htmlLang}>
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<Font cssVariable="--font-body" preload />
+		<Font cssVariable="--font-cjk" />
 		<Font cssVariable="--font-mono" />
 		<title>{fullTitle}</title>
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<link rel="icon" href="/favicon.ico" sizes="any" />
+		<link rel="alternate" hreflang="zh" href={zhHref} />
+		<link rel="alternate" hreflang="en" href={enHref} />
+		<link rel="alternate" hreflang="x-default" href={zhHref} />
+		<meta property="og:locale" content={locale === "zh" ? "zh_CN" : "en_US"} />
+		<meta property="og:locale:alternate" content={locale === "zh" ? "en_US" : "zh_CN"} />
 		<EmDashHead page={pageCtx} />
 		<link
 			rel="alternate"
 			type="application/rss+xml"
-			title={`${siteTitle} RSS Feed`}
-			href="/rss.xml"
+			title={`${siteTitle} RSS`}
+			href={rssHref}
 		/>
 		<script is:inline>
 			// Apply an explicit theme choice immediately to prevent flash.
@@ -138,44 +161,27 @@ const year = new Date().getFullYear();
 	</head>
 	<body>
 		<EmDashBodyStart page={pageCtx} />
-		<a href="#main" class="skip-link">Skip to content</a>
+		<a href="#main" class="skip-link">{copy.skip}</a>
 		<header class="site-header">
-			<div class="frame site-header__inner">
-				<a href="/" class="brand">
-					{
-						siteLogo ? (
-							<img
-								src={siteLogo.url}
-								alt={siteLogo.alt || siteTitle}
-								class="brand__logo"
-							/>
-						) : (
-							<>
-								{monogram && (
-									<span class="brand__mark" aria-hidden="true">
-										{monogram}
-									</span>
-								)}
-								<span class="brand__name">{siteTitle}</span>
-							</>
-						)
-					}
+			<div class="site-header__inner">
+				<a href={homeHref} class="brand">
+					<span class="brand__name">{wordmark}</span>
 				</a>
 				{
 					menuItems.length > 0 && (
-						<nav class="site-nav" aria-label="Main">
+						<nav class="site-nav" aria-label={copy.nav}>
 							<ul>
 								{menuItems.map((item) => (
 									<li>
 										<a
-											href={item.url}
+											href={localeHref(locale, item.url)}
 											target={item.target}
 											rel={
 												item.target === "_blank"
 													? "noopener noreferrer"
 													: undefined
 											}
-											aria-current={navCurrent(item.url)}
+											aria-current={navCurrent(localeHref(locale, item.url))}
 										>
 											{item.label}
 										</a>
@@ -186,35 +192,12 @@ const year = new Date().getFullYear();
 					)
 				}
 				<div class="site-header__actions">
-					<div class="site-search" role="search" aria-label="Site">
-						<svg
-							class="site-search__icon"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="1.75"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							aria-hidden="true"
-							><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"
-							></path></svg
-						>
-						<LiveSearch
-							placeholder="Search"
-							class="site-search__field"
-							inputClass="site-search-input"
-							resultsClass="site-search-results"
-							resultClass="site-search-result"
-							collections={["posts", "pages"]}
-						/>
-						<kbd class="site-search__kbd" aria-hidden="true"
-							><span dir="ltr">⌘K</span></kbd
-						>
-					</div>
+					<LanguageSwitcher alternates={alternates} />
 					<a
-						href="/search"
+						href={searchHref}
 						class="icon-btn site-search-link"
-						aria-label="Search"
+						data-search-href={searchHref}
+						aria-label={copy.search}
 					>
 						<svg
 							viewBox="0 0 24 24"
@@ -231,7 +214,7 @@ const year = new Date().getFullYear();
 					{
 						isLoggedIn && (
 							<a href="/_emdash/admin" class="btn btn--ghost btn--sm nav-admin">
-								Admin
+								{copy.admin}
 							</a>
 						)
 					}
@@ -257,97 +240,20 @@ const year = new Date().getFullYear();
 			<slot />
 		</main>
 
-		<footer class="site-footer band">
-			<div class="frame site-footer__grid">
-				<div class="site-footer__brand">
-					<a href="/" class="brand">
-						{
-							siteLogo ? (
-								<img
-									src={siteLogo.url}
-									alt={siteLogo.alt || siteTitle}
-									class="brand__logo"
-								/>
-							) : (
-								<>
-									{monogram && (
-										<span class="brand__mark" aria-hidden="true">
-											{monogram}
-										</span>
-									)}
-									<span class="brand__name">{siteTitle}</span>
-								</>
-							)
-						}
-					</a>
-					{siteTagline && <p class="site-footer__tagline">{siteTagline}</p>}
-				</div>
-				{
-					menuItems.length > 0 && (
-						<nav class="site-footer__col" aria-labelledby="footer-navigate">
-							<h2 id="footer-navigate" class="eyebrow">
-								Navigate
-							</h2>
-							<ul class="site-footer__links">
-								{menuItems.map((item) => (
-									<li>
-										<a
-											href={item.url}
-											target={item.target}
-											rel={
-												item.target === "_blank"
-													? "noopener noreferrer"
-													: undefined
-											}
-										>
-											{item.label}
-										</a>
-									</li>
-								))}
-							</ul>
-						</nav>
-					)
-				}
-				<div class="site-footer__col">
-					<h2 class="eyebrow">Connect</h2>
-					<ul class="site-footer__links">
-						<li>
-							<a href="/rss.xml">
-								<svg
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="1.75"
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									aria-hidden="true"
-									><path d="M4 11a9 9 0 0 1 9 9"></path><path
-										d="M4 4a16 16 0 0 1 16 16"></path><circle
-										cx="5"
-										cy="19"
-										r="1"></circle></svg
-								>
-								RSS feed
-							</a>
-						</li>
-					</ul>
-				</div>
-				<div class="site-footer__col site-footer__widgets">
-					<WidgetArea name="footer" />
-				</div>
-			</div>
-			<div class="band site-footer__bottom">
-				<div class="frame site-footer__bottom-inner">
-					<p class="site-footer__meta">
-						{`© ${year} ${siteTitle}.`} Powered by{" "}
-						<a href="https://emdashcms.com">EmDash</a>
-					</p>
-					<div class="theme-switcher" role="group" aria-label="Color theme">
+		<footer class="site-footer">
+			<div class="site-footer__inner">
+				<div class="site-footer__row">
+					<div class="site-footer__links">
+						<a href={`mailto:${email}`}>{email}</a>
+						<a href={github} rel="me">GitHub</a>
+						<a href={rssHref}>{copy.rss}</a>
+					</div>
+					<div class="theme-switcher" role="group" aria-label={copy.theme}>
 						<button
 							type="button"
 							class="theme-btn"
 							data-theme="light"
-							aria-label="Light"
+							aria-label={copy.light}
 						>
 							<svg
 								viewBox="0 0 24 24"
@@ -366,7 +272,7 @@ const year = new Date().getFullYear();
 							type="button"
 							class="theme-btn"
 							data-theme="dark"
-							aria-label="Dark"
+							aria-label={copy.dark}
 						>
 							<svg
 								viewBox="0 0 24 24"
@@ -385,7 +291,7 @@ const year = new Date().getFullYear();
 							type="button"
 							class="theme-btn"
 							data-theme="system"
-							aria-label="System"
+							aria-label={copy.system}
 						>
 							<svg
 								viewBox="0 0 24 24"
@@ -401,6 +307,8 @@ const year = new Date().getFullYear();
 						</button>
 					</div>
 				</div>
+				<p class="site-footer__note">{copy.footerNote}</p>
+				<p class="site-footer__icp">{copy.icp}</p>
 			</div>
 		</footer>
 
@@ -1002,57 +910,27 @@ const year = new Date().getFullYear();
 				top: 0;
 				z-index: 50;
 				background: color-mix(in srgb, var(--color-bg) 82%, transparent);
-				backdrop-filter: saturate(1.4) blur(12px);
-				-webkit-backdrop-filter: saturate(1.4) blur(12px);
+				backdrop-filter: blur(14px);
+				-webkit-backdrop-filter: blur(14px);
 				border-bottom: 1px solid var(--color-border);
-			}
-
-			.site-header::before,
-			.site-header::after {
-				content: "";
-				position: absolute;
-				bottom: -5px;
-				width: 9px;
-				height: 9px;
-				background:
-					linear-gradient(
-							var(--color-border-strong),
-							var(--color-border-strong)
-						)
-						center / 1px 100% no-repeat,
-					linear-gradient(
-							var(--color-border-strong),
-							var(--color-border-strong)
-						)
-						center / 100% 1px no-repeat;
-				pointer-events: none;
-			}
-
-			.site-header::before {
-				inset-inline-start: calc((100% - var(--frame-width)) / 2 - 4px);
-			}
-
-			.site-header::after {
-				inset-inline-end: calc((100% - var(--frame-width)) / 2 - 4px);
 			}
 
 			.site-header__inner {
 				display: flex;
 				align-items: center;
-				gap: var(--spacing-6);
-				min-height: var(--nav-height);
-				padding-block: var(--spacing-2);
-				border-inline: 1px solid var(--color-border);
+				gap: 1.75rem;
+				width: min(1200px, calc(100% - 3rem));
+				min-height: 3.5rem;
+				margin-inline: auto;
 			}
 
 			.brand {
 				display: inline-flex;
 				align-items: center;
-				gap: 10px;
 				min-width: 0;
-				font-size: var(--font-size-base);
+				font-size: 17px;
 				font-weight: 600;
-				letter-spacing: -0.01em;
+				letter-spacing: -0.025em;
 				color: var(--color-text);
 				text-decoration: none;
 			}
@@ -1087,49 +965,43 @@ const year = new Date().getFullYear();
 
 			.site-nav {
 				min-width: 0;
+				margin-inline-start: auto;
 			}
 
 			/* Long menus wrap rather than push the page wider than the viewport */
 			.site-nav ul {
 				display: flex;
 				flex-wrap: wrap;
-				gap: 2px;
+				gap: 0.35rem 1.75rem;
 				list-style: none;
 			}
 
 			.site-nav a {
 				display: block;
-				padding: 6px 12px;
-				border-radius: var(--radius-full);
-				font-size: var(--font-size-sm);
-				font-weight: 500;
-				color: var(--color-text-secondary);
+				padding: 6px 0;
+				font-size: 13.5px;
+				font-weight: 400;
+				color: var(--color-muted);
 				text-decoration: none;
 				white-space: nowrap;
-				transition:
-					color var(--transition-fast),
-					background-color var(--transition-fast),
-					box-shadow var(--transition-fast);
+				transition: color var(--transition-fast);
 			}
 
-			.site-nav a:hover {
-				color: var(--color-text);
-				background: var(--color-fill);
-			}
-
+			.site-nav a:hover,
 			.site-nav a[aria-current] {
 				color: var(--color-text);
-				background: var(--color-surface);
-				box-shadow:
-					inset 0 0 0 1px var(--color-border),
-					var(--shadow-sm);
+				background: transparent;
+				box-shadow: none;
 			}
 
 			.site-header__actions {
 				display: flex;
 				align-items: center;
-				gap: var(--spacing-2);
-				margin-inline-start: auto;
+				gap: 0.85rem;
+			}
+
+			.site-search-link {
+				display: inline-grid;
 			}
 
 			.site-search {
@@ -1281,10 +1153,57 @@ const year = new Date().getFullYear();
 			}
 
 			.site-search-link {
-				display: none;
+				display: inline-grid;
 			}
 
-			/* Footer */
+			.site-footer {
+				border-top: 1px solid var(--color-border);
+				color: var(--color-muted);
+				font-size: 13px;
+			}
+
+			.site-footer__inner {
+				width: min(1200px, calc(100% - 3rem));
+				margin-inline: auto;
+				padding-block: 2.5rem 2.75rem;
+			}
+
+			.site-footer__row {
+				display: flex;
+				flex-wrap: wrap;
+				align-items: center;
+				justify-content: space-between;
+				gap: 1rem;
+			}
+
+			.site-footer__links {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.35rem 1.25rem;
+			}
+
+			.site-footer__links a,
+			.site-footer__note,
+			.site-footer__icp {
+				color: var(--color-muted);
+				text-decoration: none;
+			}
+
+			.site-footer__links a:hover {
+				color: var(--color-text);
+			}
+
+			.site-footer__note,
+			.site-footer__icp {
+				margin: 0.85rem 0 0;
+				line-height: 1.6;
+			}
+
+			.site-footer__icp {
+				font-size: 11px;
+			}
+
+			/* Legacy footer grid, unused by the hub footer */
 			.site-footer__grid {
 				display: grid;
 				grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr));
@@ -1448,7 +1367,7 @@ const year = new Date().getFullYear();
 				.site-nav {
 					order: 3;
 					flex-basis: 100%;
-					margin-inline-start: -10px;
+					margin-inline-start: 0;
 				}
 
 				.site-nav a {
@@ -1478,19 +1397,12 @@ const year = new Date().getFullYear();
 		</style>
 
 		<script>
-			// ⌘K / Ctrl+K focuses the header search
-			const searchInput =
-				document.querySelector<HTMLInputElement>(".site-search-input");
-			const kbd = document.querySelector(".site-search__kbd span");
-			if (kbd && !/Mac|iPhone|iPad|iPod/.test(navigator.platform)) {
-				kbd.textContent = "Ctrl K";
-			}
+			const searchLink = document.querySelector<HTMLAnchorElement>("[data-search-href]");
 			document.addEventListener("keydown", (e) => {
 				if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== "k") return;
-				// The header search is hidden on small screens; leave the shortcut to the browser there
-				if (!searchInput || searchInput.getClientRects().length === 0) return;
+				if (!searchLink) return;
 				e.preventDefault();
-				searchInput.focus();
+				location.href = searchLink.href;
 			});
 		</script>
 		<EmDashBodyEnd page={pageCtx} />

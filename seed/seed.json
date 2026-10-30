@@ -2,18 +2,14 @@
 	"$schema": "https://emdashcms.com/seed.schema.json",
 	"version": "1",
 	"meta": {
-		"name": "keveon",
-		"description": "keveon 的名片、作品和文章",
-		"author": "keveon"
+		"name": "Hub",
+		"description": "A bilingual theme for notes and a small set of products",
+		"author": "EmDash"
 	},
 	"settings": {
-		"title": "keveon",
-		"tagline": "建造工具与产品。各自独立，在这里汇成矩阵。",
-		"url": "https://keveon.me",
-		"timezone": "Asia/Shanghai",
-		"social": {
-			"github": "https://github.com/keveon"
-		}
+		"title": "Northline",
+		"tagline": "Notes, and work in progress.",
+		"timezone": "UTC"
 	},
 	"collections": [
 		{
@@ -358,12 +354,6 @@
 					"type": "custom",
 					"label": "关于",
 					"url": "/pages/about"
-				},
-				{
-					"id": "nav-contact",
-					"type": "custom",
-					"label": "联系",
-					"url": "mailto:hello@keveon.com"
 				}
 			]
 		},
@@ -391,12 +381,6 @@
 					"type": "custom",
 					"label": "About",
 					"url": "/en/pages/about"
-				},
-				{
-					"id": "nav-contact-en",
-					"type": "custom",
-					"label": "Contact",
-					"url": "mailto:hello@keveon.com"
 				}
 			]
 		}
@@ -459,7 +443,7 @@
 								{
 									"_type": "span",
 									"_key": "k1",
-									"text": "名片、作品和文章。产品各自有自己的域名。"
+									"text": "An example site for notes and a few products."
 								}
 							]
 						}
@@ -526,7 +510,7 @@
 						{
 							"_type": "span",
 							"_key": "k1",
-							"text": "keveon 做工具，也写一点东西。邮件、AI、门户和生活里的小站，分开长，在这里碰头。"
+							"text": "Writes notes, and keeps a short list of things in progress."
 						}
 					]
 				}
@@ -550,7 +534,7 @@
 								{
 									"_type": "span",
 									"_key": "k1",
-									"text": "这里是 keveon 的名片。作品各自有自己的域名，文章记在动手的间隙里。没有更新日程，写到了就放上来。"
+									"text": "这个站点把文章和作品放在一起。作品可以链到各自的地址，文章按时间排。把你自己的名字、简介和条目填在后台里。"
 								}
 							]
 						}
@@ -575,7 +559,7 @@
 								{
 									"_type": "span",
 									"_key": "k1",
-									"text": "This is keveon's card. The products live on their own domains. The notes show up when there's something worth writing down."
+									"text": "This demo keeps notes next to a short list of products. Products can link out to their own addresses. Replace the sample name, pages, and entries in the admin."
 								}
 							]
 						}
@@ -1247,52 +1231,52 @@
 		],
 		"products": [
 			{
-				"id": "product-hqbase",
-				"slug": "hqbase",
+				"id": "product-lumen",
+				"slug": "lumen",
 				"locale": "zh",
 				"status": "published",
 				"data": {
-					"title": "HQBase",
-					"summary": "自托管收件箱。把邮件收回到自己的域名。",
-					"url": "https://mail.keveon.com",
+					"title": "Lumen",
+					"summary": "一盏给书桌用的小灯。亮度记得住，开关不吵。",
+					"url": "https://example.com/lumen",
 					"availability": "active",
 					"order": 0,
 					"features": [
 						{
 							"_type": "feature",
 							"_version": 1,
-							"_key": "hqbase-domain",
-							"title": "自己的域名",
-							"desc": "任意地址 @keveon.com，收发都是你的。",
-							"icon": "@"
-						},
-						{
-							"_type": "feature",
-							"_version": 1,
-							"_key": "hqbase-inbox",
-							"title": "干净的收件箱",
-							"desc": "重要的信留在眼前，其余安静归档。",
+							"_key": "lumen-dim",
+							"title": "记得住的亮度",
+							"desc": "上次停在哪，下次还是那一档。",
 							"icon": "·"
 						},
 						{
 							"_type": "feature",
 							"_version": 1,
-							"_key": "hqbase-update",
-							"title": "平台托管升级",
-							"desc": "签名发布，设置里一键更新。",
-							"icon": "↑"
+							"_key": "lumen-quiet",
+							"title": "安静的开关",
+							"desc": "没有提示音，也没有闪一下的灯。",
+							"icon": "○"
+						},
+						{
+							"_type": "feature",
+							"_version": 1,
+							"_key": "lumen-desk",
+							"title": "只照桌面",
+							"desc": "光落在纸上，不照到对面。",
+							"icon": "□"
 						}
 					],
 					"body": [
 						{
 							"_type": "block",
 							"style": "normal",
-							"_key": "hqbase-body",
+							"_key": "lumen-body",
 							"children": [
 								{
 									"_type": "span",
-									"_key": "hqbase-body-span",
-									"text": "HQBase 跑在 Cloudflare Workers 上。信箱跟着域名走，不借别人的品牌收信。"
+									"_key": "lumen-body-span",
+									"text": "Lumen 是主题自带的示例作品。换成你自己的产品，封面、链接和特性都可以在后台改。"
 								}
 							]
 						}
@@ -1300,53 +1284,53 @@
 				}
 			},
 			{
-				"id": "product-hqbase-en",
-				"slug": "hqbase",
+				"id": "product-lumen-en",
+				"slug": "lumen",
 				"locale": "en",
-				"translationOf": "product-hqbase",
+				"translationOf": "product-lumen",
 				"status": "published",
 				"data": {
-					"title": "HQBase",
-					"summary": "A self-hosted inbox. Mail comes back to your own domain.",
-					"url": "https://mail.keveon.com",
+					"title": "Lumen",
+					"summary": "A small lamp for a desk. It remembers the brightness, and the switch stays quiet.",
+					"url": "https://example.com/lumen",
 					"availability": "active",
 					"order": 0,
 					"features": [
 						{
 							"_type": "feature",
 							"_version": 1,
-							"_key": "hqbase-domain-en",
-							"title": "Your domain",
-							"desc": "Any address at your domain, both ways.",
-							"icon": "@"
-						},
-						{
-							"_type": "feature",
-							"_version": 1,
-							"_key": "hqbase-inbox-en",
-							"title": "A quiet inbox",
-							"desc": "What matters stays in front. The rest files itself.",
+							"_key": "lumen-dim-en",
+							"title": "Remembers the level",
+							"desc": "It comes back to the brightness you left.",
 							"icon": "·"
 						},
 						{
 							"_type": "feature",
 							"_version": 1,
-							"_key": "hqbase-update-en",
-							"title": "Signed updates",
-							"desc": "Publish a release, then update from settings.",
-							"icon": "↑"
+							"_key": "lumen-quiet-en",
+							"title": "A quiet switch",
+							"desc": "No chime, and no flash.",
+							"icon": "○"
+						},
+						{
+							"_type": "feature",
+							"_version": 1,
+							"_key": "lumen-desk-en",
+							"title": "Light on the desk",
+							"desc": "It falls on the page, not across the room.",
+							"icon": "□"
 						}
 					],
 					"body": [
 						{
 							"_type": "block",
 							"style": "normal",
-							"_key": "hqbase-body-en",
+							"_key": "lumen-body-en",
 							"children": [
 								{
 									"_type": "span",
-									"_key": "hqbase-body-en-span",
-									"text": "HQBase runs on Cloudflare Workers. The mailbox follows the domain, instead of borrowing someone else's brand."
+									"_key": "lumen-body-en-span",
+									"text": "Lumen is sample content shipped with the theme. Replace it in the admin with your own product, cover, link, and features."
 								}
 							]
 						}

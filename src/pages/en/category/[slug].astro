@@ -1,15 +1,5 @@
 ---
-import { decodeSlug, getTaxonomyTermsWithCacheHint } from "emdash";
-import Page from "../../category/[slug].astro";
-import { notFoundPath } from "../../../utils/routing";
-
-const slug = decodeSlug(Astro.params.slug);
-const terms = await getTaxonomyTermsWithCacheHint("category", {
-	includeCounts: false,
-	locale: Astro.currentLocale,
-});
-const term = slug ? terms.data.find((item) => item.slug === slug) : null;
-if (!term) return Astro.rewrite(notFoundPath(Astro.currentLocale));
+import View from "../../../views/CategoryArchive.astro";
 ---
 
-<Page />
+<View />

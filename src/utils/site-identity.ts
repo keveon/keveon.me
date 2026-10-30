@@ -8,6 +8,7 @@ export interface MediaReference {
 export interface BlogSiteIdentitySettings {
 	title?: string;
 	tagline?: string;
+	url?: string;
 	logo?: MediaReference;
 	favicon?: MediaReference;
 	social?: {
@@ -15,21 +16,28 @@ export interface BlogSiteIdentitySettings {
 	};
 }
 
-/** Header wordmark. Always lowercase, independent of the settings title casing. */
-export const WORDMARK = "keveon";
-
-const DEFAULT_SITE_TAGLINE = "建造工具与产品。各自独立，在这里汇成矩阵。";
-export const CONTACT_EMAIL = "hello@keveon.com";
-const DEFAULT_GITHUB = "https://github.com/keveon";
+const DEFAULT_SITE_TITLE = "Studio";
 
 export function resolveBlogSiteIdentity(settings?: BlogSiteIdentitySettings) {
-	const title = settings?.title?.trim();
+	const siteTitle = settings?.title?.trim() || DEFAULT_SITE_TITLE;
+	const siteUrl = settings?.url?.trim() || "";
 	return {
-		siteTitle: title || WORDMARK,
-		wordmark: WORDMARK,
-		siteTagline: settings?.tagline?.trim() || DEFAULT_SITE_TAGLINE,
+		siteTitle,
+		/** Header wordmark. Comes from site settings, not a baked-in name. */
+		wordmark: siteTitle,
+		siteTagline: settings?.tagline?.trim() || "",
 		siteLogo: settings?.logo?.url ? settings.logo : null,
-		email: CONTACT_EMAIL,
-		github: settings?.social?.github?.trim() || DEFAULT_GITHUB,
+		github: settings?.social?.github?.trim() || "",
+		siteUrl,
 	};
+}
+
+/** Uppercase label above the homepage title: the public host, or the site title. */
+export function siteEyebrow(identity: { siteTitle: string; siteUrl: string }): string {
+	if (!identity.siteUrl) return identity.siteTitle;
+	try {
+		return new URL(identity.siteUrl).host;
+	} catch {
+		return identity.siteTitle;
+	}
 }

@@ -10,7 +10,7 @@ import { Font } from "astro:assets";
 import LanguageSwitcher from "../components/LanguageSwitcher.astro";
 import { asLocale, t } from "../i18n/ui";
 import { absoluteUrl, localeHref } from "../utils/routing";
-import { resolveBlogSiteIdentity } from "../utils/site-identity";
+import { resolveBlogSiteIdentity, siteEyebrow } from "../utils/site-identity";
 import "../styles/tokens.css";
 import "../styles/theme.css";
 
@@ -56,7 +56,7 @@ if (Astro.cache?.enabled) {
 	Astro.cache.set(menuResult.cacheHint);
 }
 
-const { siteTitle, wordmark, email, github } = resolveBlogSiteIdentity(
+const { siteTitle, wordmark, github, siteUrl } = resolveBlogSiteIdentity(
 	settingsResult.data,
 );
 const homeHref = localeHref(locale, "/");
@@ -244,8 +244,14 @@ const htmlLang = locale === "zh" ? "zh-CN" : "en";
 			<div class="site-footer__inner">
 				<div class="site-footer__row">
 					<div class="site-footer__links">
-						<a href={`mailto:${email}`}>{email}</a>
-						<a href={github} rel="me">GitHub</a>
+						{
+							siteUrl && (
+								<a href={siteUrl}>{siteEyebrow({ siteTitle, siteUrl })}</a>
+							)
+						}
+						{github && (
+							<a href={github} rel="me">GitHub</a>
+						)}
 						<a href={rssHref}>{copy.rss}</a>
 					</div>
 					<div class="theme-switcher" role="group" aria-label={copy.theme}>

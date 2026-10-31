@@ -674,7 +674,7 @@
 						"opinion"
 					]
 				},
-				"locale": "zh"
+				"locale": "en"
 			},
 			{
 				"id": "post-2",
@@ -767,7 +767,7 @@
 						"opinion"
 					]
 				},
-				"locale": "zh"
+				"locale": "en"
 			},
 			{
 				"id": "post-3",
@@ -854,7 +854,7 @@
 						"opinion"
 					]
 				},
-				"locale": "zh"
+				"locale": "en"
 			},
 			{
 				"id": "post-4",
@@ -941,7 +941,7 @@
 						"tools"
 					]
 				},
-				"locale": "zh"
+				"locale": "en"
 			},
 			{
 				"id": "post-5",
@@ -1028,7 +1028,7 @@
 						"creativity"
 					]
 				},
-				"locale": "zh"
+				"locale": "en"
 			},
 			{
 				"id": "post-6",
@@ -1115,7 +1115,7 @@
 						"creativity"
 					]
 				},
-				"locale": "zh"
+				"locale": "en"
 			},
 			{
 				"id": "post-7",
@@ -1202,7 +1202,7 @@
 						"opinion"
 					]
 				},
-				"locale": "zh"
+				"locale": "en"
 			},
 			{
 				"id": "post-draft",
@@ -1226,7 +1226,7 @@
 						}
 					]
 				},
-				"locale": "zh"
+				"locale": "en"
 			}
 		],
 		"products": [

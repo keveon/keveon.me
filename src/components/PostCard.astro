@@ -2,8 +2,10 @@
 import type { ContentEntry, InferCollectionData } from "emdash";
 import { Image } from "emdash/ui";
 import Byline from "./Byline.astro";
+import { t } from "../i18n/ui";
 import { formatDate } from "../utils/locale";
 import { formatReadingTime, getReadingTime } from "../utils/reading-time";
+import { contentSlug, entryPath } from "../utils/routing";
 
 interface Props {
 	post: ContentEntry<InferCollectionData<"posts">>;
@@ -23,12 +25,16 @@ const {
 	priority = false,
 } = Astro.props;
 
+const copy = t(Astro.currentLocale);
 const Heading = `h${headingLevel}` as const;
-const href = `/posts/${post.id}`;
+const href = entryPath(Astro.currentLocale, "posts", contentSlug(post));
 const titleId = `post-${variant}-${post.id}`;
-const title = post.data.title || "Untitled";
+const title = post.data.title || copy.untitled;
 const publishedAt = post.data.publishedAt ?? null;
-const readingTime = formatReadingTime(getReadingTime(post.data.content));
+const readingTime = formatReadingTime(
+	getReadingTime(post.data.content),
+	Astro.currentLocale,
+);
 const bylines = post.data.bylines ?? [];
 const visibleTags = tags.slice(0, variant === "card" ? 2 : 3);
 
@@ -80,7 +86,7 @@ const sizes = {
 			{
 				variant === "feature" && (
 					<span class="post__cta arrow-link" aria-hidden="true">
-						Read article
+						{copy.readArticle}
 						<svg
 							viewBox="0 0 24 24"
 							fill="none"
@@ -105,10 +111,10 @@ const sizes = {
 						size={variant === "feature" ? "sm" : "xs"}
 					/>
 					{visibleTags.length > 0 && (
-						<ul class="chips post__tags" aria-label="Tags">
+						<ul class="chips post__tags" aria-label={copy.tags}>
 							{visibleTags.map((tag) => (
 								<li>
-									<a href={`/tag/${tag.slug}`} class="chip">
+									<a href={entryPath(Astro.currentLocale, "tag", tag.slug)} class="chip">
 										{tag.label}
 									</a>
 								</li>

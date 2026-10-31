@@ -2,13 +2,14 @@
 	"$schema": "https://emdashcms.com/seed.schema.json",
 	"version": "1",
 	"meta": {
-		"name": "Blog Starter",
-		"description": "A blog with posts and pages",
+		"name": "Hub",
+		"description": "A bilingual theme for notes and a small set of products",
 		"author": "EmDash"
 	},
 	"settings": {
-		"title": "My Blog",
-		"tagline": "Thoughts on building for the web"
+		"title": "Northline",
+		"tagline": "Notes, and work in progress.",
+		"timezone": "UTC"
 	},
 	"collections": [
 		{
@@ -16,7 +17,14 @@
 			"label": "Posts",
 			"labelSingular": "Post",
 			"urlPattern": "/posts/{slug}",
-			"supports": ["drafts", "revisions", "preview", "scheduling", "search", "seo"],
+			"supports": [
+				"drafts",
+				"revisions",
+				"preview",
+				"scheduling",
+				"search",
+				"seo"
+			],
 			"commentsEnabled": true,
 			"fields": [
 				{
@@ -49,7 +57,13 @@
 			"label": "Pages",
 			"labelSingular": "Page",
 			"urlPattern": "/pages/{slug}",
-			"supports": ["drafts", "revisions", "preview", "search", "seo"],
+			"supports": [
+				"drafts",
+				"revisions",
+				"preview",
+				"search",
+				"seo"
+			],
 			"fields": [
 				{
 					"slug": "title",
@@ -65,52 +79,240 @@
 					"searchable": true
 				}
 			]
+		},
+		{
+			"slug": "products",
+			"label": "Products",
+			"labelSingular": "Product",
+			"description": "Work shown on the hub.",
+			"urlPattern": "/products/{slug}",
+			"supports": [
+				"drafts",
+				"revisions",
+				"search",
+				"seo"
+			],
+			"titleField": "title",
+			"admin": {
+				"listColumns": [
+					"title",
+					"availability",
+					"order"
+				]
+			},
+			"fields": [
+				{
+					"slug": "title",
+					"label": "Title",
+					"type": "string",
+					"required": true,
+					"searchable": true
+				},
+				{
+					"slug": "summary",
+					"label": "Summary",
+					"type": "text",
+					"searchable": true
+				},
+				{
+					"slug": "cover",
+					"label": "Cover",
+					"type": "image",
+					"translatable": false
+				},
+				{
+					"slug": "body",
+					"label": "Body",
+					"type": "portableText",
+					"searchable": true
+				},
+				{
+					"slug": "features",
+					"label": "Features",
+					"type": "blocks",
+					"validation": {
+						"allowedTypes": [
+							"feature"
+						],
+						"maxItems": 12
+					}
+				},
+				{
+					"slug": "url",
+					"label": "URL",
+					"type": "url",
+					"translatable": false
+				},
+				{
+					"slug": "availability",
+					"label": "Status",
+					"type": "select",
+					"translatable": false,
+					"indexed": true,
+					"defaultValue": "active",
+					"validation": {
+						"options": [
+							"active",
+							"beta",
+							"preview",
+							"retired"
+						]
+					}
+				},
+				{
+					"slug": "order",
+					"label": "Order",
+					"type": "integer",
+					"translatable": false,
+					"indexed": true,
+					"defaultValue": 0
+				}
+			]
 		}
 	],
 	"taxonomies": [
 		{
 			"name": "category",
-			"label": "Categories",
-			"labelSingular": "Category",
+			"label": "分类",
+			"labelSingular": "分类",
 			"hierarchical": true,
-			"collections": ["posts"],
+			"collections": [
+				"posts"
+			],
 			"terms": [
 				{
 					"slug": "development",
-					"label": "Development"
+					"label": "开发",
+					"id": "term-category-development",
+					"locale": "zh"
 				},
 				{
 					"slug": "design",
-					"label": "Design"
+					"label": "设计",
+					"id": "term-category-design",
+					"locale": "zh"
 				},
 				{
 					"slug": "notes",
-					"label": "Notes"
+					"label": "随记",
+					"id": "term-category-notes",
+					"locale": "zh"
+				}
+			],
+			"id": "tax-category",
+			"locale": "zh"
+		},
+		{
+			"name": "tag",
+			"label": "标签",
+			"labelSingular": "标签",
+			"hierarchical": false,
+			"collections": [
+				"posts"
+			],
+			"terms": [
+				{
+					"slug": "webdev",
+					"label": "前端",
+					"id": "term-tag-webdev",
+					"locale": "zh"
+				},
+				{
+					"slug": "opinion",
+					"label": "看法",
+					"id": "term-tag-opinion",
+					"locale": "zh"
+				},
+				{
+					"slug": "tools",
+					"label": "工具",
+					"id": "term-tag-tools",
+					"locale": "zh"
+				},
+				{
+					"slug": "creativity",
+					"label": "创造",
+					"id": "term-tag-creativity",
+					"locale": "zh"
+				}
+			],
+			"id": "tax-tag",
+			"locale": "zh"
+		},
+		{
+			"id": "tax-category-en",
+			"name": "category",
+			"label": "Categories",
+			"labelSingular": "Category",
+			"locale": "en",
+			"translationOf": "tax-category",
+			"hierarchical": true,
+			"collections": [
+				"posts"
+			],
+			"terms": [
+				{
+					"id": "term-category-development-en",
+					"slug": "development",
+					"label": "Development",
+					"locale": "en",
+					"translationOf": "term-category-development"
+				},
+				{
+					"id": "term-category-design-en",
+					"slug": "design",
+					"label": "Design",
+					"locale": "en",
+					"translationOf": "term-category-design"
+				},
+				{
+					"id": "term-category-notes-en",
+					"slug": "notes",
+					"label": "Notes",
+					"locale": "en",
+					"translationOf": "term-category-notes"
 				}
 			]
 		},
 		{
+			"id": "tax-tag-en",
 			"name": "tag",
 			"label": "Tags",
 			"labelSingular": "Tag",
+			"locale": "en",
+			"translationOf": "tax-tag",
 			"hierarchical": false,
-			"collections": ["posts"],
+			"collections": [
+				"posts"
+			],
 			"terms": [
 				{
+					"id": "term-tag-webdev-en",
 					"slug": "webdev",
-					"label": "Web Development"
+					"label": "Web Development",
+					"locale": "en",
+					"translationOf": "term-tag-webdev"
 				},
 				{
+					"id": "term-tag-opinion-en",
 					"slug": "opinion",
-					"label": "Opinion"
+					"label": "Opinion",
+					"locale": "en",
+					"translationOf": "term-tag-opinion"
 				},
 				{
+					"id": "term-tag-tools-en",
 					"slug": "tools",
-					"label": "Tools"
+					"label": "Tools",
+					"locale": "en",
+					"translationOf": "term-tag-tools"
 				},
 				{
+					"id": "term-tag-creativity-en",
 					"slug": "creativity",
-					"label": "Creativity"
+					"label": "Creativity",
+					"locale": "en",
+					"translationOf": "term-tag-creativity"
 				}
 			]
 		}
@@ -130,23 +332,55 @@
 	],
 	"menus": [
 		{
+			"id": "menu-primary",
 			"name": "primary",
-			"label": "Primary Navigation",
+			"label": "主导航",
+			"locale": "zh",
 			"items": [
 				{
+					"id": "nav-products",
 					"type": "custom",
-					"label": "Home",
-					"url": "/"
+					"label": "作品",
+					"url": "/products"
 				},
 				{
+					"id": "nav-posts",
+					"type": "custom",
+					"label": "动态",
+					"url": "/posts"
+				},
+				{
+					"id": "nav-about",
+					"type": "custom",
+					"label": "关于",
+					"url": "/pages/about"
+				}
+			]
+		},
+		{
+			"id": "menu-primary-en",
+			"name": "primary",
+			"label": "Primary",
+			"locale": "en",
+			"translationOf": "menu-primary",
+			"items": [
+				{
+					"id": "nav-products-en",
+					"type": "custom",
+					"label": "Work",
+					"url": "/en/products"
+				},
+				{
+					"id": "nav-posts-en",
+					"type": "custom",
+					"label": "Notes",
+					"url": "/en/posts"
+				},
+				{
+					"id": "nav-about-en",
 					"type": "custom",
 					"label": "About",
-					"url": "/pages/about"
-				},
-				{
-					"type": "custom",
-					"label": "Posts",
-					"url": "/posts"
+					"url": "/en/pages/about"
 				}
 			]
 		}
@@ -160,22 +394,22 @@
 				{
 					"type": "component",
 					"componentId": "core:search",
-					"title": "Search"
+					"title": "搜索"
 				},
 				{
 					"type": "component",
 					"componentId": "core:categories",
-					"title": "Categories"
+					"title": "分类"
 				},
 				{
 					"type": "component",
 					"componentId": "core:tags",
-					"title": "Tags"
+					"title": "标签"
 				},
 				{
 					"type": "component",
 					"componentId": "core:recent-posts",
-					"title": "Recent Posts",
+					"title": "最近的文章",
 					"props": {
 						"count": 5,
 						"showDate": true
@@ -184,7 +418,7 @@
 				{
 					"type": "component",
 					"componentId": "core:archives",
-					"title": "Archives",
+					"title": "归档",
 					"props": {
 						"type": "monthly",
 						"limit": 6
@@ -199,19 +433,19 @@
 			"widgets": [
 				{
 					"type": "content",
-					"title": "About",
+					"title": "关于",
 					"content": [
 						{
 							"_type": "block",
 							"style": "normal",
+							"_key": "k0",
 							"children": [
 								{
 									"_type": "span",
-									"text": "A blog about software, design, and the occasional stray thought.",
-									"_key": "k1"
+									"_key": "k1",
+									"text": "An example site for notes and a few products."
 								}
-							],
-							"_key": "k0"
+							]
 						}
 					]
 				}
@@ -221,55 +455,64 @@
 	"sections": [
 		{
 			"slug": "newsletter-signup",
-			"title": "Newsletter Signup",
-			"description": "A call-to-action block for newsletter subscriptions",
-			"keywords": ["newsletter", "subscribe", "email", "cta"],
+			"title": "订阅",
+			"description": "新文章发出时通知一声",
+			"keywords": [
+				"newsletter",
+				"subscribe",
+				"email",
+				"cta"
+			],
 			"source": "theme",
 			"content": [
 				{
 					"_type": "block",
 					"style": "h3",
+					"_key": "k0",
 					"children": [
 						{
 							"_type": "span",
-							"text": "Stay in the loop",
-							"_key": "k1"
+							"_key": "k1",
+							"text": "有新的再告诉你"
 						}
-					],
-					"_key": "k0"
+					]
 				},
 				{
 					"_type": "block",
 					"style": "normal",
+					"_key": "k2",
 					"children": [
 						{
 							"_type": "span",
-							"text": "Get notified when new posts are published. No spam, unsubscribe anytime.",
-							"_key": "k3"
+							"_key": "k3",
+							"text": "文章发出时收一封信。不定期，也可以随时退订。"
 						}
-					],
-					"_key": "k2"
+					]
 				}
 			]
 		},
 		{
 			"slug": "about-author",
-			"title": "About the Author",
-			"description": "Brief author bio for use in posts or pages",
-			"keywords": ["author", "bio", "about"],
+			"title": "关于作者",
+			"description": "放在文章或页面里的短介绍",
+			"keywords": [
+				"author",
+				"bio",
+				"about"
+			],
 			"source": "theme",
 			"content": [
 				{
 					"_type": "block",
 					"style": "normal",
+					"_key": "k0",
 					"children": [
 						{
 							"_type": "span",
-							"text": "A software developer who writes about building things on the web. Based somewhere with good coffee and reliable internet.",
-							"_key": "k1"
+							"_key": "k1",
+							"text": "Writes notes, and keeps a short list of things in progress."
 						}
-					],
-					"_key": "k0"
+					]
 				}
 			]
 		}
@@ -281,31 +524,44 @@
 				"slug": "about",
 				"status": "published",
 				"data": {
+					"title": "关于",
+					"content": [
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "k0",
+							"children": [
+								{
+									"_type": "span",
+									"_key": "k1",
+									"text": "这个站点把文章和作品放在一起。作品可以链到各自的地址，文章按时间排。把你自己的名字、简介和条目填在后台里。"
+								}
+							]
+						}
+					]
+				},
+				"locale": "zh"
+			},
+			{
+				"id": "about-en",
+				"slug": "about",
+				"locale": "en",
+				"translationOf": "about",
+				"status": "published",
+				"data": {
 					"title": "About",
 					"content": [
 						{
 							"_type": "block",
 							"style": "normal",
+							"_key": "k0",
 							"children": [
 								{
 									"_type": "span",
-									"text": "A place for writing about software, design, and the occasional stray thought. No posting schedule, no newsletter funnel. Just things I wanted to write down.",
-									"_key": "k1"
+									"_key": "k1",
+									"text": "This demo keeps notes next to a short list of products. Products can link out to their own addresses. Replace the sample name, pages, and entries in the admin."
 								}
-							],
-							"_key": "k0"
-						},
-						{
-							"_type": "block",
-							"style": "normal",
-							"children": [
-								{
-									"_type": "span",
-									"text": "Built with Astro and EmDash. The source is open if you want to see how it works.",
-									"_key": "k3"
-								}
-							],
-							"_key": "k2"
+							]
 						}
 					]
 				}
@@ -411,9 +667,14 @@
 					}
 				],
 				"taxonomies": {
-					"category": ["development"],
-					"tag": ["opinion"]
-				}
+					"category": [
+						"development"
+					],
+					"tag": [
+						"opinion"
+					]
+				},
+				"locale": "en"
 			},
 			{
 				"id": "post-2",
@@ -498,9 +759,15 @@
 					}
 				],
 				"taxonomies": {
-					"category": ["development"],
-					"tag": ["webdev", "opinion"]
-				}
+					"category": [
+						"development"
+					],
+					"tag": [
+						"webdev",
+						"opinion"
+					]
+				},
+				"locale": "en"
 			},
 			{
 				"id": "post-3",
@@ -580,9 +847,14 @@
 					]
 				},
 				"taxonomies": {
-					"category": ["notes"],
-					"tag": ["opinion"]
-				}
+					"category": [
+						"notes"
+					],
+					"tag": [
+						"opinion"
+					]
+				},
+				"locale": "en"
 			},
 			{
 				"id": "post-4",
@@ -662,9 +934,14 @@
 					]
 				},
 				"taxonomies": {
-					"category": ["development"],
-					"tag": ["tools"]
-				}
+					"category": [
+						"development"
+					],
+					"tag": [
+						"tools"
+					]
+				},
+				"locale": "en"
 			},
 			{
 				"id": "post-5",
@@ -744,9 +1021,14 @@
 					]
 				},
 				"taxonomies": {
-					"category": ["design"],
-					"tag": ["creativity"]
-				}
+					"category": [
+						"design"
+					],
+					"tag": [
+						"creativity"
+					]
+				},
+				"locale": "en"
 			},
 			{
 				"id": "post-6",
@@ -826,9 +1108,14 @@
 					]
 				},
 				"taxonomies": {
-					"category": ["development"],
-					"tag": ["creativity"]
-				}
+					"category": [
+						"development"
+					],
+					"tag": [
+						"creativity"
+					]
+				},
+				"locale": "en"
 			},
 			{
 				"id": "post-7",
@@ -908,9 +1195,14 @@
 					]
 				},
 				"taxonomies": {
-					"category": ["notes"],
-					"tag": ["opinion"]
-				}
+					"category": [
+						"notes"
+					],
+					"tag": [
+						"opinion"
+					]
+				},
+				"locale": "en"
 			},
 			{
 				"id": "post-draft",
@@ -933,8 +1225,153 @@
 							"_key": "k0"
 						}
 					]
+				},
+				"locale": "en"
+			}
+		],
+		"products": [
+			{
+				"id": "product-lumen",
+				"slug": "lumen",
+				"locale": "zh",
+				"status": "published",
+				"data": {
+					"title": "Lumen",
+					"summary": "一盏给书桌用的小灯。亮度记得住，开关不吵。",
+					"url": "https://example.com/lumen",
+					"availability": "active",
+					"order": 0,
+					"features": [
+						{
+							"_type": "feature",
+							"_version": 1,
+							"_key": "lumen-dim",
+							"title": "记得住的亮度",
+							"desc": "上次停在哪，下次还是那一档。",
+							"icon": "·"
+						},
+						{
+							"_type": "feature",
+							"_version": 1,
+							"_key": "lumen-quiet",
+							"title": "安静的开关",
+							"desc": "没有提示音，也没有闪一下的灯。",
+							"icon": "○"
+						},
+						{
+							"_type": "feature",
+							"_version": 1,
+							"_key": "lumen-desk",
+							"title": "只照桌面",
+							"desc": "光落在纸上，不照到对面。",
+							"icon": "□"
+						}
+					],
+					"body": [
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "lumen-body",
+							"children": [
+								{
+									"_type": "span",
+									"_key": "lumen-body-span",
+									"text": "Lumen 是主题自带的示例作品。换成你自己的产品，封面、链接和特性都可以在后台改。"
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"id": "product-lumen-en",
+				"slug": "lumen",
+				"locale": "en",
+				"translationOf": "product-lumen",
+				"status": "published",
+				"data": {
+					"title": "Lumen",
+					"summary": "A small lamp for a desk. It remembers the brightness, and the switch stays quiet.",
+					"url": "https://example.com/lumen",
+					"availability": "active",
+					"order": 0,
+					"features": [
+						{
+							"_type": "feature",
+							"_version": 1,
+							"_key": "lumen-dim-en",
+							"title": "Remembers the level",
+							"desc": "It comes back to the brightness you left.",
+							"icon": "·"
+						},
+						{
+							"_type": "feature",
+							"_version": 1,
+							"_key": "lumen-quiet-en",
+							"title": "A quiet switch",
+							"desc": "No chime, and no flash.",
+							"icon": "○"
+						},
+						{
+							"_type": "feature",
+							"_version": 1,
+							"_key": "lumen-desk-en",
+							"title": "Light on the desk",
+							"desc": "It falls on the page, not across the room.",
+							"icon": "□"
+						}
+					],
+					"body": [
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "lumen-body-en",
+							"children": [
+								{
+									"_type": "span",
+									"_key": "lumen-body-en-span",
+									"text": "Lumen is sample content shipped with the theme. Replace it in the admin with your own product, cover, link, and features."
+								}
+							]
+						}
+					]
 				}
 			}
 		]
-	}
+	},
+	"defaultLocale": "zh",
+	"blockTypes": [
+		{
+			"slug": "feature",
+			"label": "Feature",
+			"description": "One capability on a product page.",
+			"currentVersion": 1,
+			"versions": [
+				{
+					"version": 1,
+					"fields": [
+						{
+							"slug": "title",
+							"label": "Title",
+							"type": "string",
+							"required": true
+						},
+						{
+							"slug": "desc",
+							"label": "Description",
+							"type": "text"
+						},
+						{
+							"slug": "icon",
+							"label": "Icon",
+							"type": "string",
+							"validation": {
+								"maxLength": 16
+							}
+						}
+					]
+				}
+			]
+		}
+	]
 }

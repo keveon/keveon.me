@@ -1,0 +1,452 @@
+---
+import { getEmDashCollection, getEmDashEntry, getSeoMeta, getTranslations, decodeSlug, getSiteSettings } from "emdash";
+import { Blocks, defineBlockComponents, Image, PortableText } from "emdash/ui";
+import Base from "../layouts/Base.astro";
+import FeatureBlock from "../components/FeatureBlock.astro";
+import ProductCard from "../components/ProductCard.astro";
+import { availabilityLabel, t } from "../i18n/ui";
+import { resolveBlogSiteIdentity } from "../utils/site-identity";
+import { contentSlug, hostOf, localeHref } from "../utils/routing";
+import "../styles/prose.css";
+
+const copy = t(Astro.currentLocale);
+const slug = decodeSlug(Astro.params.slug);
+const loaded = slug
+	? await getEmDashEntry("products", slug, { locale: Astro.currentLocale })
+	: { entry: null, cacheHint: undefined };
+const product = loaded.entry;
+if (!product) Astro.response.status = 404;
+if (product && loaded.cacheHint && Astro.cache?.enabled) Astro.cache.set(loaded.cacheHint);
+const { siteTitle } = product
+	? resolveBlogSiteIdentity(await getSiteSettings())
+	: { siteTitle: "" };
+const settingsLocale = Astro.currentLocale;
+const featureComponents = defineBlockComponents({
+	feature: FeatureBlock,
+});
+let cover = product?.data.cover;
+let coverUrl: string | undefined;
+let seo = null as ReturnType<typeof getSeoMeta> | null;
+let features: NonNullable<typeof product>["data"]["features"] = [];
+let status = "";
+let domain = "";
+let alternates: Partial<Record<"zh" | "en", string>> = {};
+let related: NonNullable<typeof product>[] = [];
+
+if (product) {
+	cover = product.data.cover;
+	coverUrl =
+		cover && typeof cover.src === "string" && cover.src
+			? cover.src.startsWith("http")
+				? cover.src
+				: new URL(cover.src, Astro.url.origin).href
+			: undefined;
+	seo = getSeoMeta(product, {
+		siteTitle,
+		siteUrl: Astro.url.origin,
+		path: Astro.url.pathname.replace(/\/$/, "") || "/",
+		defaultOgImage: coverUrl,
+		defaultDescription: product.data.summary,
+	});
+	features = Array.isArray(product.data.features) ? product.data.features : [];
+	status = availabilityLabel(settingsLocale, product.data.availability);
+	domain = hostOf(product.data.url);
+	const { translations } = await getTranslations("products", product.data.id);
+	for (const translation of translations) {
+		if (translation.status !== "published" || !translation.slug) continue;
+		if (translation.locale === "zh" || translation.locale === "en") {
+			alternates[translation.locale] = localeHref(
+				translation.locale,
+				`/products/${translation.slug}`,
+			);
+		}
+	}
+	const { entries: others, cacheHint: othersHint } = await getEmDashCollection("products", {
+		locale: Astro.currentLocale,
+		limit: 8,
+	});
+	if (Astro.cache?.enabled) Astro.cache.set(othersHint);
+	related = others
+		.filter((item) => contentSlug(item) !== contentSlug(product))
+		.sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0))
+		.slice(0, 3);
+}
+---
+
+{
+	!product && (
+		<Base title={copy.pageNotFound}>
+			<section class="hub-empty">
+				<h1>{copy.pageNotFound}</h1>
+				<p>{copy.pageNotFoundLead}</p>
+				<a class="hub-btn" href={localeHref(Astro.currentLocale, "/")}>{copy.goHome}</a>
+			</section>
+		</Base>
+	)
+}
+{
+	product && seo && (
+<Base
+	title={seo.title}
+	pageTitle={seo.ogTitle}
+	description={seo.description}
+	image={seo.ogImage}
+	canonical={seo.canonical}
+	robots={seo.robots}
+	content={{ collection: "products", id: product.data.id, slug }}
+	alternates={alternates}
+>
+	<p class="product-back">
+		<a href={localeHref(Astro.currentLocale, "/products")}>
+			<span aria-hidden="true">←</span> {copy.backToWorks}
+		</a>
+	</p>
+
+	<section class="product-hero">
+		<div class="product-hero__copy">
+			{status && <p class="product-kicker">{status}</p>}
+			<h1 {...product.edit.title}>{product.data.title}</h1>
+			{
+				product.data.summary && (
+					<p class="product-summary" {...product.edit.summary}>
+						{product.data.summary}
+					</p>
+				)
+			}
+			{
+				product.data.url && (
+					<p class="product-actions">
+						<a class="hub-btn" href={product.data.url} {...product.edit.url}>
+							{copy.open} {domain}
+							<span aria-hidden="true">→</span>
+						</a>
+					</p>
+				)
+			}
+		</div>
+		<div class:list={["product-stage", `product-stage--tone-${contentSlug(product).length % 6}`]}>
+			{
+				cover ? (
+					<div class="product-stage__media" {...product.edit.cover}>
+						<Image image={cover} alt={cover.alt || product.data.title} priority sizes="(min-width: 1024px) 640px, 100vw" />
+					</div>
+				) : (
+					<span class="product-stage__mark" aria-hidden="true">
+						{[...product.data.title.trim()][0]}
+					</span>
+				)
+			}
+		</div>
+	</section>
+
+	{
+		features.length > 0 && (
+			<section class="product-section" aria-labelledby="product-features">
+				<h2 id="product-features" class="section-label">
+					{copy.features}
+				</h2>
+				<div class="feature-grid" {...product.edit.features}>
+					<Blocks value={features} components={featureComponents} />
+				</div>
+			</section>
+		)
+	}
+
+	{
+		(status || domain) && (
+			<dl class="product-facts">
+				{status && (
+					<div>
+						<dt>{copy.status}</dt>
+						<dd><span class="fact-dot" aria-hidden="true"></span>{status}</dd>
+					</div>
+				)}
+				{domain && (
+					<div>
+						<dt>{copy.domain}</dt>
+						<dd>{domain}</dd>
+					</div>
+				)}
+			</dl>
+		)
+	}
+
+	{
+		product.data.body && product.data.body.length > 0 && (
+			<div class="prose product-body" {...product.edit.body}>
+				<PortableText value={product.data.body} />
+			</div>
+		)
+	}
+
+	{
+		related.length > 0 && (
+			<section class="product-section" aria-labelledby="other-work">
+				<div class="section-row">
+					<h2 id="other-work" class="section-label">
+						{copy.otherWorks}
+					</h2>
+					<a href={localeHref(Astro.currentLocale, "/products")}>{copy.viewAll} →</a>
+				</div>
+				<div class="related-grid">
+					{related.map((item, index) => (
+						<ProductCard product={item} tone={index + 1} headingLevel={3} />
+					))}
+				</div>
+			</section>
+		)
+	}
+</Base>
+	)
+}
+
+<style>
+	.product-back {
+		margin: 0;
+		padding-top: 1.5rem;
+		font-size: 13px;
+	}
+
+	.product-back a {
+		color: var(--color-muted);
+		text-decoration: none;
+	}
+
+	.product-back a:hover {
+		color: var(--color-text);
+	}
+
+	.product-hero {
+		display: grid;
+		gap: 2rem;
+		padding-block: 1.25rem 3.5rem;
+	}
+
+	.product-kicker {
+		margin: 0 0 0.8rem;
+		font-size: 11px;
+		font-weight: 500;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--color-muted);
+	}
+
+	.product-hero h1 {
+		margin: 0;
+		font-size: clamp(2.75rem, 1.6rem + 3vw, 3.75rem);
+		font-weight: 600;
+		letter-spacing: -0.04em;
+		line-height: 1.05;
+	}
+
+	.product-summary {
+		margin: 1rem 0 0;
+		max-width: 36rem;
+		font-size: 1.125rem;
+		line-height: 1.6;
+		color: var(--color-text-secondary);
+	}
+
+	.product-actions {
+		margin: 1.25rem 0 0;
+	}
+
+	.hub-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		min-height: 2.75rem;
+		padding: 0 1.15rem;
+		border-radius: 999px;
+		background: var(--color-brand);
+		color: var(--color-on-brand);
+		font-size: 0.95rem;
+		font-weight: 500;
+		text-decoration: none;
+	}
+
+	.product-stage {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 320px;
+		padding: 1.5rem;
+		border: 1px solid var(--color-border);
+		border-radius: 22px;
+		background: linear-gradient(160deg, #e8eef5, #c9d7e8);
+		box-shadow: var(--shadow-card);
+		overflow: hidden;
+	}
+
+	:root.dark .product-stage {
+		background: radial-gradient(at 30% 20%, #2a3548, #12151c);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root:not(.light) .product-stage {
+			background: radial-gradient(at 30% 20%, #2a3548, #12151c);
+		}
+	}
+
+	.product-stage__media,
+	.product-stage__media :global(img) {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		border-radius: 12px;
+	}
+
+	.product-stage__media {
+		min-height: 280px;
+	}
+
+	.product-stage__mark {
+		font-size: 4rem;
+		font-weight: 600;
+		letter-spacing: -0.05em;
+		color: var(--color-brand);
+	}
+
+	.product-section {
+		padding-bottom: 3.5rem;
+	}
+
+	.section-label {
+		margin: 0 0 1.25rem;
+		font-size: 13px;
+		font-weight: 500;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		color: var(--color-muted);
+	}
+
+	.section-row {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 1rem;
+	}
+
+	.section-row a {
+		color: var(--color-text-secondary);
+		font-size: 0.9rem;
+		font-weight: 500;
+		text-decoration: none;
+	}
+
+	.feature-grid :global(.emdash-blocks),
+	.feature-grid {
+		display: grid;
+		grid-template-columns: repeat(12, minmax(0, 1fr));
+		gap: 1.25rem;
+	}
+
+	.feature-grid :global(article) {
+		grid-column: span 12;
+	}
+
+	.product-facts {
+		display: flex;
+		flex-wrap: wrap;
+		margin: 0 0 3.5rem;
+		border: 1px solid var(--color-border);
+		border-radius: 18px;
+		overflow: hidden;
+	}
+
+	.product-facts > div {
+		flex: 1 1 180px;
+		padding: 1.15rem 1.4rem 1.25rem;
+		border-inline-end: 1px solid var(--color-border);
+	}
+
+	.product-facts > div:last-child {
+		border-inline-end: 0;
+	}
+
+	.product-facts dt {
+		margin-bottom: 0.35rem;
+		font-size: 11px;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--color-muted);
+	}
+
+	.product-facts dd {
+		display: flex;
+		align-items: center;
+		gap: 0.45rem;
+		margin: 0;
+		font-size: 0.95rem;
+		font-weight: 500;
+	}
+
+	.fact-dot {
+		width: 0.45rem;
+		height: 0.45rem;
+		border-radius: 999px;
+		background: var(--color-brand);
+	}
+
+	.product-body {
+		max-width: 42rem;
+		padding-bottom: 3.5rem;
+	}
+
+	.hub-empty {
+		display: grid;
+		gap: 0.75rem;
+		max-width: 32rem;
+		padding-block: 4rem 6rem;
+	}
+
+	.hub-empty h1 {
+		margin: 0;
+		font-size: clamp(2.5rem, 1.4rem + 2vw, 3.25rem);
+	}
+
+	.hub-empty p {
+		margin: 0;
+		color: var(--color-text-secondary);
+	}
+
+	.hub-btn {
+		display: inline-flex;
+		align-items: center;
+		width: fit-content;
+		min-height: 2.75rem;
+		margin-top: 0.5rem;
+		padding: 0 1.15rem;
+		border-radius: 999px;
+		background: var(--color-brand);
+		color: var(--color-on-brand);
+		font-weight: 500;
+		text-decoration: none;
+	}
+
+	.related-grid {
+		display: grid;
+		gap: 1.25rem;
+	}
+
+	@media (min-width: 768px) {
+		.feature-grid :global(article) {
+			grid-column: span 4;
+		}
+
+		.related-grid {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.product-hero {
+			grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+			align-items: center;
+		}
+
+		.product-stage {
+			min-height: 480px;
+		}
+	}
+</style>

@@ -50,7 +50,9 @@ pnpm install
 pnpm dev
 ```
 
-Open http://localhost:4321/_emdash/admin and complete the setup wizard. EmDash runs database migrations and applies the blog seed during setup. The site is available at http://localhost:4321.
+Open http://localhost:4321/_emdash/admin and complete the setup wizard. EmDash runs database migrations and applies the seed during setup. The site is available at http://localhost:4321.
+
+The seed is a reusable theme demo: a generic site title, sample notes, and one fictional product. Personal names, domains, and real products are filled in the EmDash admin after deploy, not committed in `seed/seed.json`. The header wordmark reads `settings.title`.
 
 ## Deploying
 

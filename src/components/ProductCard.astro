@@ -1,0 +1,267 @@
+---
+import type { ContentEntry, InferCollectionData } from "emdash";
+import { Image } from "emdash/ui";
+import { availabilityLabel, t } from "../i18n/ui";
+import { contentSlug, entryPath } from "../utils/routing";
+
+interface Props {
+	product: ContentEntry<InferCollectionData<"products">>;
+	variant?: "feature" | "tile";
+	tone?: number;
+	headingLevel?: 2 | 3;
+	priority?: boolean;
+}
+
+const {
+	product,
+	variant = "tile",
+	tone = 0,
+	headingLevel = 3,
+	priority = false,
+} = Astro.props;
+
+const copy = t(Astro.currentLocale);
+const Heading = `h${headingLevel}` as const;
+const slug = contentSlug(product);
+const href = entryPath(Astro.currentLocale, "products", slug);
+const title = product.data.title || copy.untitled;
+const status = availabilityLabel(Astro.currentLocale, product.data.availability);
+const cta = product.data.url ? copy.open : copy.look;
+const mark = [...title.trim()][0] ?? "";
+---
+
+<a class:list={["work", `work--${variant}`, `work--tone-${tone % 6}`]} href={href}>
+	<div class="work__plate">
+		{
+			product.data.cover?.src || product.data.cover?.id ? (
+				<div class="work__image" {...product.edit.cover}>
+					<Image
+						image={product.data.cover}
+						alt={product.data.cover.alt || title}
+						sizes={
+							variant === "feature"
+								? "(min-width: 900px) 640px, 100vw"
+								: "(min-width: 1080px) 420px, 100vw"
+						}
+						priority={priority}
+					/>
+				</div>
+			) : (
+				<span class="work__mark" aria-hidden="true">
+					{mark}
+				</span>
+			)
+		}
+	</div>
+	<div class="work__body">
+		{status && <p class="work__kicker">{status}</p>}
+		<Heading class="work__title" {...product.edit.title}>{title}</Heading>
+		{
+			product.data.summary && (
+				<p class="work__summary" {...product.edit.summary}>
+					{product.data.summary}
+				</p>
+			)
+		}
+		<span class="work__cta">
+			{cta}
+			<span class="work__chevron" aria-hidden="true">→</span>
+		</span>
+	</div>
+</a>
+
+<style>
+	.work {
+		display: flex;
+		flex-direction: column;
+		min-height: 340px;
+		overflow: hidden;
+		border: 1px solid var(--color-border);
+		border-radius: 22px;
+		background: var(--color-surface);
+		color: inherit;
+		text-decoration: none;
+		box-shadow: var(--shadow-card);
+		transition:
+			transform 240ms var(--ease-out),
+			box-shadow 240ms var(--ease-out);
+	}
+
+	.work:hover {
+		transform: translateY(-6px) scale(1.012);
+		box-shadow: var(--shadow-card-hover);
+	}
+
+	.work:hover .work__chevron {
+		transform: translateX(4px);
+	}
+
+	.work--feature {
+		min-height: 440px;
+	}
+
+	.work__plate {
+		position: relative;
+		display: flex;
+		flex: 1;
+		align-items: center;
+		justify-content: center;
+		min-height: 180px;
+		padding: 1.25rem;
+		overflow: hidden;
+	}
+
+	.work--tone-0 .work__plate {
+		background: linear-gradient(160deg, #e8eef5 0%, #d9e4f0 55%, #c9d7e8 100%);
+	}
+	.work--tone-1 .work__plate {
+		background: linear-gradient(165deg, #ede8f7 0%, #ddd4f0 50%, #c9bbe6 100%);
+	}
+	.work--tone-2 .work__plate {
+		background: linear-gradient(160deg, #e7f0ec 0%, #d3e5dc 100%);
+	}
+	.work--tone-3 .work__plate {
+		background: linear-gradient(165deg, #f8ede4 0%, #f0d5c0 55%, #e8c4a8 100%);
+	}
+	.work--tone-4 .work__plate {
+		background: linear-gradient(160deg, #eceae6 0%, #ddd9d2 100%);
+	}
+	.work--tone-5 .work__plate {
+		background: linear-gradient(160deg, #e4e8ec 0%, #cfd6de 100%);
+	}
+
+	:root.dark .work--tone-0 .work__plate {
+		background: radial-gradient(at 30% 20%, #2a3548 0%, #1a2030 45%, #12151c 100%);
+	}
+	:root.dark .work--tone-1 .work__plate {
+		background: radial-gradient(at 70% 10%, #3a2f52 0%, #221c32 50%, #16141f 100%);
+	}
+	:root.dark .work--tone-2 .work__plate {
+		background: radial-gradient(at 40% 30%, #2a3a32 0%, #1a221e 60%, #121816 100%);
+	}
+	:root.dark .work--tone-3 .work__plate {
+		background: radial-gradient(at 60% 20%, #4a3228 0%, #2a1e18 55%, #18120f 100%);
+	}
+	:root.dark .work--tone-4 .work__plate {
+		background: radial-gradient(at 40% 30%, #2c2c30 0%, #1a1a1e 60%, #121214 100%);
+	}
+	:root.dark .work--tone-5 .work__plate {
+		background: radial-gradient(at 50% 20%, #243040 0%, #161c24 55%, #101418 100%);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root:not(.light) .work--tone-0 .work__plate {
+			background: radial-gradient(at 30% 20%, #2a3548 0%, #1a2030 45%, #12151c 100%);
+		}
+		:root:not(.light) .work--tone-1 .work__plate {
+			background: radial-gradient(at 70% 10%, #3a2f52 0%, #221c32 50%, #16141f 100%);
+		}
+		:root:not(.light) .work--tone-2 .work__plate {
+			background: radial-gradient(at 40% 30%, #2a3a32 0%, #1a221e 60%, #121816 100%);
+		}
+		:root:not(.light) .work--tone-3 .work__plate {
+			background: radial-gradient(at 60% 20%, #4a3228 0%, #2a1e18 55%, #18120f 100%);
+		}
+		:root:not(.light) .work--tone-4 .work__plate {
+			background: radial-gradient(at 40% 30%, #2c2c30 0%, #1a1a1e 60%, #121214 100%);
+		}
+		:root:not(.light) .work--tone-5 .work__plate {
+			background: radial-gradient(at 50% 20%, #243040 0%, #161c24 55%, #101418 100%);
+		}
+	}
+
+	.work__image,
+	.work__image :global(img) {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		border-radius: 12px;
+	}
+
+	.work__image {
+		position: absolute;
+		inset: 0.75rem;
+	}
+
+	.work__mark {
+		font-size: 2.5rem;
+		font-weight: 600;
+		letter-spacing: -0.04em;
+		color: var(--color-brand);
+		opacity: 0.85;
+	}
+
+	.work__body {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		padding: 1.25rem 1.35rem 1.4rem;
+	}
+
+	.work__kicker {
+		margin: 0;
+		font-size: 11px;
+		font-weight: 500;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--color-muted);
+	}
+
+	.work__title {
+		margin: 0;
+		font-size: 1.35rem;
+		font-weight: 600;
+		letter-spacing: -0.03em;
+		line-height: 1.2;
+	}
+
+	.work--feature .work__title {
+		font-size: clamp(1.75rem, 1.2rem + 1.4vw, 2.125rem);
+	}
+
+	.work__summary {
+		margin: 0;
+		color: var(--color-text-secondary);
+		font-size: 0.95rem;
+		line-height: 1.55;
+	}
+
+	.work__cta {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		margin-top: 0.65rem;
+		font-size: 0.9rem;
+		font-weight: 500;
+		color: var(--color-text);
+	}
+
+	.work__chevron {
+		display: inline-block;
+		transition: transform 220ms var(--ease-out);
+	}
+
+	@media (min-width: 768px) {
+		.work--feature {
+			flex-direction: row;
+			min-height: 480px;
+		}
+
+		.work--feature .work__plate {
+			width: 58%;
+			min-height: 480px;
+		}
+
+		.work--feature .work__body {
+			width: 42%;
+			justify-content: center;
+			padding: 2.5rem;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.work:hover {
+			transform: none;
+		}
+	}
+</style>

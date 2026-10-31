@@ -1,5 +1,6 @@
 ---
 import type { ContentBylineCredit } from "emdash";
+import { t } from "../i18n/ui";
 
 interface Props {
 	bylines: ContentBylineCredit[];
@@ -35,6 +36,7 @@ const people = bylines.map(({ byline, roleLabel }) => ({
 		.map((word) => [...word][0]?.toUpperCase() ?? "")
 		.join(""),
 }));
+const copy = t(Astro.currentLocale);
 const shown = people.slice(0, max).map((person) => person.name);
 const hidden = people.slice(max).map((person) => person.name);
 ---
@@ -112,7 +114,7 @@ const hidden = people.slice(max).map((person) => person.name);
 						>
 							+{hidden.length}
 						</span>
-						<span class="sr-only">and {hidden.join(", ")}</span>
+						<span class="sr-only">{copy.and} {hidden.join(", ")}</span>
 					</>
 				)}
 			</span>

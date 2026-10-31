@@ -11,6 +11,19 @@ export default defineConfig({
 		layout: "constrained",
 		responsiveStyles: true,
 	},
+	// zh is unprefixed. en lives at /en/. Do not redirect from the `locale`
+	// cookie or Accept-Language — the URL is the only locale signal, so caches
+	// and search engines see a stable page per language.
+	i18n: {
+		defaultLocale: "zh",
+		locales: ["zh", "en"],
+		fallback: { en: "zh" },
+		routing: {
+			prefixDefaultLocale: false,
+			redirectToDefaultLocale: false,
+			fallbackType: "rewrite",
+		},
+	},
 	integrations: [
 		react(),
 		emdash({
@@ -21,9 +34,20 @@ export default defineConfig({
 	fonts: [
 		{
 			provider: fontProviders.google(),
-			name: "Inter",
+			name: "DM Sans",
 			cssVariable: "--font-body",
 			weights: [400, 500, 600, 700],
+			styles: ["normal"],
+			subsets: ["latin"],
+			fallbacks: ["Noto Sans SC", "PingFang SC", "sans-serif"],
+		},
+		{
+			provider: fontProviders.google(),
+			name: "Noto Sans SC",
+			cssVariable: "--font-cjk",
+			weights: [400, 500, 600, 700],
+			styles: ["normal"],
+			subsets: ["chinese-simplified"],
 			fallbacks: ["sans-serif"],
 		},
 		{

@@ -59,8 +59,9 @@ export function getReadingTime(content: PortableTextBlock[] | undefined): number
 }
 
 /**
- * Format reading time for display
+ * Format reading time for display in the active locale.
  */
-export function formatReadingTime(minutes: number): string {
-	return `${minutes} min read`;
+export function formatReadingTime(minutes: number, locale?: string | null): string {
+	if (locale === "en") return minutes === 1 ? "1 min read" : `${minutes} min read`;
+	return `约 ${minutes} 分钟`;
 }

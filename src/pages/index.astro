@@ -51,41 +51,43 @@ const worksHref = localeHref(Astro.currentLocale, "/products");
 		)
 	}
 
-	<section class="hub-block" aria-labelledby="all-work">
-		<div class="section-row">
-			<h2 id="all-work" class="section-label">
-				{copy.works}
-			</h2>
-			{
-				rest.length > 0 && (
-					<a class="section-more" href={worksHref}>
-						{copy.viewAll} <span aria-hidden="true">→</span>
-					</a>
-				)
-			}
-		</div>
-		{
-			ordered.length === 0 ? (
-				<div class="hub-empty">
-					<h3>{copy.emptyWorksTitle}</h3>
-					<p>{copy.emptyWorksText}</p>
-					<a class="hub-btn" href="/_emdash/admin/content/products/new">
-						{copy.emptyWorksAction}
-					</a>
+	{
+		(ordered.length === 0 || rest.length > 0) && (
+			<section class="hub-block" aria-labelledby="all-work">
+				<div class="section-row">
+					<h2 id="all-work" class="section-label">
+						{copy.works}
+					</h2>
+					{
+						rest.length > 0 && (
+							<a class="section-more" href={worksHref}>
+								{copy.viewAll} <span aria-hidden="true">→</span>
+							</a>
+						)
+					}
 				</div>
-			) : (
-				rest.length > 0 && (
-					<div class="work-grid">
-						{rest.map((product, index) => (
-							<div class:list={["work-grid__item", spans[index % spans.length]]}>
-								<ProductCard product={product} tone={index + 1} headingLevel={3} />
-							</div>
-						))}
-					</div>
-				)
-			)
-		}
-	</section>
+				{
+					ordered.length === 0 ? (
+						<div class="hub-empty">
+							<h3>{copy.emptyWorksTitle}</h3>
+							<p>{copy.emptyWorksText}</p>
+							<a class="hub-btn" href="/_emdash/admin/content/products/new">
+								{copy.emptyWorksAction}
+							</a>
+						</div>
+					) : (
+						<div class="work-grid">
+							{rest.map((product, index) => (
+								<div class:list={["work-grid__item", spans[index % spans.length]]}>
+									<ProductCard product={product} tone={index + 1} headingLevel={3} />
+								</div>
+							))}
+						</div>
+					)
+				}
+			</section>
+		)
+	}
 
 	{
 		posts.length > 0 && (

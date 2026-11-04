@@ -9,7 +9,7 @@ import { t } from "../i18n/ui";
 import { localeHref, stripLocale } from "../utils/routing";
 
 interface Props {
-	/** Explicit paths for published translations. Missing locales fall back to the same path. */
+	/** Published translation paths. When set, only those locales appear — missing ones are omitted, never invented. */
 	alternates?: Partial<Record<Locale, string>>;
 }
 
@@ -19,14 +19,20 @@ const bare = stripLocale(Astro.url.pathname);
 const search = Astro.url.search;
 const currentLabel = localeNativeLabel(locale);
 
-const choices = LOCALES.map((item) => {
-	const href =
-		Astro.props.alternates?.[item.code] ??
-		`${localeHref(item.code, bare)}${search}`;
+const provided = Astro.props.alternates;
+const choiceLocales =
+	provided !== undefined
+		? LOCALES.filter((item) => Boolean(provided[item.code]))
+		: LOCALES;
+const choices = choiceLocales.map((item) => {
+	const path =
+		provided !== undefined
+			? provided[item.code]!
+			: localeHref(item.code, bare);
 	return {
 		code: item.code,
 		label: item.nativeLabel,
-		href,
+		href: `${path}${search}`,
 		current: item.code === locale,
 	};
 });

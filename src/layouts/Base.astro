@@ -8,7 +8,7 @@ import {
 import { createPublicPageContext } from "emdash/page";
 import { Font } from "astro:assets";
 import LanguageSwitcher from "../components/LanguageSwitcher.astro";
-import { asLocale, t, type Locale } from "../i18n/ui";
+import { LOCALES, asLocale, t, type Locale } from "../i18n/ui";
 import { absoluteUrl, localeHref } from "../utils/routing";
 import { resolveBlogSiteIdentity, siteEyebrow } from "../utils/site-identity";
 import "../styles/tokens.css";
@@ -63,10 +63,20 @@ const homeHref = localeHref(locale, "/");
 const searchHref = localeHref(locale, "/search");
 const rssHref = localeHref(locale, "/rss.xml");
 const barePath = Astro.url.pathname.replace(/\/$/, "") || "/";
-const zhPath = alternates?.zh ?? localeHref("zh", barePath);
-const enPath = alternates?.en ?? localeHref("en", barePath);
-const zhHref = absoluteUrl(Astro.url.origin, zhPath);
-const enHref = absoluteUrl(Astro.url.origin, enPath);
+/** When the page passes `alternates`, only emit locales that have real paths. */
+const alternateLinks = (
+	alternates !== undefined
+		? LOCALES.filter((item) => Boolean(alternates[item.code])).map((item) => ({
+				code: item.code,
+				href: absoluteUrl(Astro.url.origin, alternates[item.code]!),
+			}))
+		: LOCALES.map((item) => ({
+				code: item.code,
+				href: absoluteUrl(Astro.url.origin, localeHref(item.code, barePath)),
+			}))
+);
+const defaultAlternate =
+	alternateLinks.find((item) => item.code === "zh") ?? alternateLinks[0];
 const socialImage = image || absoluteUrl(Astro.url.origin, "/og.png");
 const titleIncludesSiteName =
 	title === siteTitle ||
@@ -133,11 +143,23 @@ const htmlLang = locale === "zh" ? "zh-CN" : "en";
 		<title>{fullTitle}</title>
 		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 		<link rel="icon" href="/favicon.ico" sizes="any" />
-		<link rel="alternate" hreflang="zh" href={zhHref} />
-		<link rel="alternate" hreflang="en" href={enHref} />
-		<link rel="alternate" hreflang="x-default" href={zhHref} />
+		{
+			alternateLinks.map((item) => (
+				<link rel="alternate" hreflang={item.code} href={item.href} />
+			))
+		}
+		{defaultAlternate && <link rel="alternate" hreflang="x-default" href={defaultAlternate.href} />}
 		<meta property="og:locale" content={locale === "zh" ? "zh_CN" : "en_US"} />
-		<meta property="og:locale:alternate" content={locale === "zh" ? "en_US" : "zh_CN"} />
+		{
+			alternateLinks
+				.filter((item) => item.code !== locale)
+				.map((item) => (
+					<meta
+						property="og:locale:alternate"
+						content={item.code === "zh" ? "zh_CN" : "en_US"}
+					/>
+				))
+		}
 		<EmDashHead page={pageCtx} />
 		<link
 			rel="alternate"

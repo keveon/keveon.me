@@ -6,7 +6,9 @@ import { contentSlug, localeHref } from "./routing";
 import { resolveBlogSiteIdentity } from "./site-identity";
 
 export async function renderRss(context: APIContext, localeInput?: string) {
-	const locale = asLocale(localeInput ?? (context.url.pathname.startsWith("/en") ? "en" : "zh"));
+	// Astro's i18n routing sets currentLocale from the URL, so the default
+	// locale is unprefixed and every other locale sits under /<locale>/.
+	const locale = asLocale(localeInput ?? context.currentLocale);
 	const origin = context.url.origin;
 	const { siteTitle, siteTagline } = resolveBlogSiteIdentity(await getSiteSettings());
 	const { entries: posts } = await getEmDashCollection("posts", {

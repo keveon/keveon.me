@@ -11,9 +11,12 @@ export default defineConfig({
 		layout: "constrained",
 		responsiveStyles: true,
 	},
-	// zh is unprefixed. en lives at /en/. Do not redirect from the `locale`
-	// cookie or Accept-Language — the URL is the only locale signal, so caches
-	// and search engines see a stable page per language.
+	// Astro's default "prefix-other-locales" routing: zh is unprefixed, en
+	// lives at /en/. Do NOT switch to prefixDefaultLocale or "prefix-always" —
+	// that puts /_emdash/admin behind a locale prefix and breaks the admin.
+	// Do not redirect from the `locale` cookie or Accept-Language: the URL is
+	// the only locale signal, so caches and search engines see a stable page
+	// per language.
 	i18n: {
 		defaultLocale: "zh",
 		locales: ["zh", "en"],

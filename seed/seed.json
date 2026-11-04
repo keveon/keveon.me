@@ -368,19 +368,19 @@
 					"id": "nav-products-en",
 					"type": "custom",
 					"label": "Work",
-					"url": "/en/products"
+					"url": "/products"
 				},
 				{
 					"id": "nav-posts-en",
 					"type": "custom",
 					"label": "Notes",
-					"url": "/en/posts"
+					"url": "/posts"
 				},
 				{
 					"id": "nav-about-en",
 					"type": "custom",
 					"label": "About",
-					"url": "/en/pages/about"
+					"url": "/pages/about"
 				}
 			]
 		}

@@ -24,9 +24,42 @@ export interface Post {
   slug: string | null;
   status: string;
   title: string;
-  featured_image?: { id: string; src?: string; alt?: string; width?: number; height?: number; filename?: string; mimeType?: string; blurhash?: string; dominantColor?: string; focalX?: number; focalY?: number; provider?: string; previewUrl?: string; meta?: Record<string, unknown>; darkVariant?: { id: string; src?: string; alt?: string; width?: number; height?: number; filename?: string; mimeType?: string; blurhash?: string; dominantColor?: string; focalX?: number; focalY?: number; provider?: string; previewUrl?: string; meta?: Record<string, unknown> } };
+  featured_image?: { id: string; src?: string; alt?: string; caption?: string; width?: number; height?: number; filename?: string; mimeType?: string; blurhash?: string; dominantColor?: string; focalX?: number; focalY?: number; provider?: string; previewUrl?: string; meta?: Record<string, unknown>; darkVariant?: { id: string; src?: string; alt?: string; caption?: string; width?: number; height?: number; filename?: string; mimeType?: string; blurhash?: string; dominantColor?: string; focalX?: number; focalY?: number; provider?: string; previewUrl?: string; meta?: Record<string, unknown> } };
   content?: PortableTextBlock[];
   excerpt?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  publishedAt: Date | null;
+  byline?: BylineSummary | null;
+  bylines?: ContentBylineCredit[];
+  terms?: Record<string, TaxonomyTerm[]>;
+}
+
+export interface ProductFeaturesFeatureV1Block {
+  _type: "feature";
+  _version: 1;
+  _key: string;
+  "title": string;
+  "desc"?: string | null;
+  "icon"?: string | null;
+}
+
+export type ProductFeaturesFeatureBlock = ProductFeaturesFeatureV1Block;
+
+export type ProductFeaturesBlock = ProductFeaturesFeatureBlock;
+
+export interface Product {
+  id: string;
+  slug: string | null;
+  status: string;
+  title: string;
+  summary?: string;
+  cover?: { id: string; src?: string; alt?: string; caption?: string; width?: number; height?: number; filename?: string; mimeType?: string; blurhash?: string; dominantColor?: string; focalX?: number; focalY?: number; provider?: string; previewUrl?: string; meta?: Record<string, unknown>; darkVariant?: { id: string; src?: string; alt?: string; caption?: string; width?: number; height?: number; filename?: string; mimeType?: string; blurhash?: string; dominantColor?: string; focalX?: number; focalY?: number; provider?: string; previewUrl?: string; meta?: Record<string, unknown> } };
+  body?: PortableTextBlock[];
+  features?: ProductFeaturesBlock[];
+  url?: string;
+  availability?: "active" | "beta" | "preview" | "retired";
+  order?: number;
   createdAt: Date;
   updatedAt: Date;
   publishedAt: Date | null;
@@ -39,5 +72,6 @@ declare module "emdash" {
   interface EmDashCollections {
     pages: Page;
     posts: Post;
+    products: Product;
   }
 }

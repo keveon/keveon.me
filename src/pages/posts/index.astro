@@ -3,6 +3,11 @@ import { getEmDashCollection, getTermsForEntries } from "emdash";
 import Base from "../../layouts/Base.astro";
 import PostCard from "../../components/PostCard.astro";
 import Pagination from "../../components/Pagination.astro";
+import { t } from "../../i18n/ui";
+import { localeHref } from "../../utils/routing";
+
+const copy = t(Astro.currentLocale);
+const postsHref = localeHref(Astro.currentLocale, "/posts");
 
 // Sort in the database rather than in JS — lets the DB use its index on
 // published_at and avoids a full-table scan on the client.
@@ -12,6 +17,7 @@ const {
 	cacheHint,
 	nextCursor,
 } = await getEmDashCollection("posts", {
+	locale: Astro.currentLocale,
 	orderBy: { published_at: "desc" },
 	limit: 20,
 	cursor,
@@ -26,6 +32,7 @@ const tagsByEntry = await getTermsForEntries(
 	"posts",
 	posts.map((p) => p.data.id),
 	"tag",
+	{ locale: Astro.currentLocale },
 );
 
 const postsWithTags = posts.map((post) => ({
@@ -34,12 +41,12 @@ const postsWithTags = posts.map((post) => ({
 }));
 ---
 
-<Base title="All Posts" description="Browse all blog posts">
+<Base title={copy.postsTitle} description={copy.postsDescription}>
 	<header class="band intro">
 		<div class="frame">
-			<p class="eyebrow">Archive</p>
-			<h1 class="intro__title">All Posts</h1>
-			<p class="intro__lead">Every post, newest first.</p>
+			<p class="eyebrow">{copy.postsEyebrow}</p>
+			<h1 class="intro__title">{copy.postsTitle}</h1>
+			<p class="intro__lead">{copy.postsLead}</p>
 		</div>
 	</header>
 
@@ -49,17 +56,15 @@ const postsWithTags = posts.map((post) => ({
 				posts.length === 0 ? (
 					<div class="empty-state">
 						<h2 class="empty-state__title">
-							{cursor ? "No more posts" : "No posts yet"}
+							{cursor ? copy.noMorePosts : copy.emptyPostsTitle}
 						</h2>
 						<p class="empty-state__text">
-							{cursor
-								? "You have reached the end of the archive."
-								: "Published posts will show up here."}
+							{cursor ? copy.endOfArchive : copy.emptyPostsText}
 						</p>
 						{cursor && (
 							<div class="empty-state__actions">
-								<a href="/posts" class="btn btn--ghost">
-									First page
+								<a href={postsHref} class="btn btn--ghost">
+									{copy.firstPage}
 								</a>
 							</div>
 						)}
@@ -74,7 +79,7 @@ const postsWithTags = posts.map((post) => ({
 							))}
 						</ol>
 						<Pagination
-							basePath="/posts"
+							basePath={postsHref}
 							cursor={cursor}
 							nextCursor={nextCursor}
 						/>

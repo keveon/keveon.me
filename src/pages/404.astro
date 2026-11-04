@@ -1,28 +1,31 @@
 ---
 import Base from "../layouts/Base.astro";
+import { t } from "../i18n/ui";
+import { localeHref } from "../utils/routing";
+
+const copy = t(Astro.currentLocale);
+Astro.response.status = 404;
 ---
 
-<Base title="Page not found">
+<Base title={copy.pageNotFound}>
 	<section class="band not-found">
 		<div class="not-found__backdrop" aria-hidden="true"></div>
 		<div class="frame not-found__inner">
-			<p class="eyebrow not-found__code">Error 404</p>
-			<h1 class="intro__title">Page not found</h1>
-			<p class="intro__lead">
-				The page you’re looking for doesn’t exist or may have moved.
-			</p>
+			<p class="eyebrow not-found__code">{copy.pageNotFoundCode}</p>
+			<h1 class="intro__title">{copy.pageNotFound}</h1>
+			<p class="intro__lead">{copy.pageNotFoundLead}</p>
 			<div class="not-found__actions">
-				<a href="/" class="btn">Go home</a>
-				<a href="/posts" class="btn btn--ghost">Browse posts</a>
+				<a href={localeHref(Astro.currentLocale, "/")} class="btn">{copy.goHome}</a>
+				<a href={localeHref(Astro.currentLocale, "/posts")} class="btn btn--ghost">{copy.browsePosts}</a>
 			</div>
 			<form
 				method="get"
-				action="/search"
+				action={localeHref(Astro.currentLocale, "/search")}
 				role="search"
-				aria-label="Posts"
+				aria-label={copy.searchLabel}
 				class="not-found__search"
 			>
-				<label for="not-found-query" class="sr-only">Search posts</label>
+				<label for="not-found-query" class="sr-only">{copy.search}</label>
 				<svg
 					class="not-found__search-icon"
 					viewBox="0 0 24 24"
@@ -40,12 +43,12 @@ import Base from "../layouts/Base.astro";
 					class="not-found__search-input"
 					type="search"
 					name="q"
-					placeholder="Or search posts"
+					placeholder={copy.searchPlaceholder}
 				/>
 				<button
 					type="submit"
 					class="btn not-found__search-submit"
-					aria-label="Search"
+					aria-label={copy.search}
 				>
 					<svg
 						viewBox="0 0 24 24"

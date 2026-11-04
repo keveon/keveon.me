@@ -2,35 +2,65 @@
 import {
 	getEmDashEntry,
 	getSeoMeta,
+	getTranslations,
 	decodeSlug,
 	getSiteSettings,
 } from "emdash";
 import { PortableText } from "emdash/ui";
 import Base from "../../layouts/Base.astro";
+import { localeHref } from "../../utils/routing";
 import { resolveBlogSiteIdentity } from "../../utils/site-identity";
 import "../../styles/prose.css";
 
+import { t, type Locale } from "../../i18n/ui";
+
+const copy = t(Astro.currentLocale);
 const slug = decodeSlug(Astro.params.slug);
-
-if (!slug) {
-	return Astro.rewrite("/404");
-}
-
-const { entry: page, cacheHint } = await getEmDashEntry("pages", slug);
-
-if (!page) {
-	return Astro.rewrite("/404");
-}
-
-if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
+const loaded = slug
+	? await getEmDashEntry("pages", slug, { locale: Astro.currentLocale })
+	: { entry: null, cacheHint: undefined };
+const page = loaded.entry;
+if (!page) Astro.response.status = 404;
+if (page && loaded.cacheHint && Astro.cache?.enabled) Astro.cache.set(loaded.cacheHint);
 const { siteTitle } = resolveBlogSiteIdentity(await getSiteSettings());
-const seo = getSeoMeta(page, {
-	siteTitle,
-	siteUrl: Astro.url.origin,
-	path: Astro.url.pathname.replace(/\/$/, ""),
-});
+const seo = page
+	? getSeoMeta(page, {
+			siteTitle,
+			siteUrl: Astro.url.origin,
+			path: Astro.url.pathname.replace(/\/$/, ""),
+		})
+	: null;
+
+const alternates: Partial<Record<Locale, string>> = {};
+if (page) {
+	const { translations } = await getTranslations("pages", page.data.id);
+	for (const translation of translations) {
+		if (translation.status !== "published" || !translation.slug) continue;
+		if (translation.locale === "zh" || translation.locale === "en") {
+			alternates[translation.locale] = localeHref(
+				translation.locale,
+				`/pages/${translation.slug}`,
+			);
+		}
+	}
+}
 ---
 
+{
+	!page && (
+		<Base title={copy.pageNotFound}>
+			<section class="band section">
+				<div class="frame empty-state">
+					<h1 class="empty-state__title">{copy.pageNotFound}</h1>
+					<p class="empty-state__text">{copy.pageNotFoundLead}</p>
+					<a class="btn" href={localeHref(Astro.currentLocale, "/")}>{copy.goHome}</a>
+				</div>
+			</section>
+		</Base>
+	)
+}
+{
+	page && seo && (
 <Base
 	title={seo.title}
 	pageTitle={seo.ogTitle}
@@ -38,6 +68,7 @@ const seo = getSeoMeta(page, {
 	canonical={seo.canonical}
 	robots={seo.robots}
 	content={{ collection: "pages", id: page.data.id, slug }}
+	alternates={alternates}
 >
 	<article class="band page">
 		<div class="frame page__layout">
@@ -51,6 +82,8 @@ const seo = getSeoMeta(page, {
 		</div>
 	</article>
 </Base>
+	)
+}
 
 <style>
 	.page {

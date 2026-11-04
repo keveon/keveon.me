@@ -1,34 +1,64 @@
 /*
-  theme.css -- your theme overrides. This is the file to edit to
-  retheme the site.
-
-  Every design token lives in src/styles/tokens.css (colors, type
-  scale, spacing, layout, shadows) with its default value. Override any
-  of them here: declarations in this file are unlayered, so they always
-  beat the @layer base defaults in tokens.css.
-
-  Colors are defined with light-dark(). Overriding with a plain color
-  changes light and dark mode at once; use light-dark(<light>, <dark>)
-  to set different values per mode.
-
-  Set the three brand tokens together, as in the example below:
-  --color-on-brand defaults to near-black in dark mode.
-
-  Webfonts are loaded in astro.config.mjs (--font-body, --font-mono).
-  Swap the loaded font there; use overrides here for system fonts or a
-  separate heading face.
-
-  Example:
-
-  :root {
-    --color-brand: light-dark(#0f766e, #2dd4bf);
-    --color-brand-hover: light-dark(#115e59, #5eead4);
-    --color-on-brand: light-dark(#ffffff, #0a0a0a);
-    --font-heading: "Iowan Old Style", Georgia, serif;
-    --radius-lg: 18px;
-    --radius-xl: 24px;
-  }
+  Hub theme overrides. Colors follow the locked light and dark drafts.
+  Unlayered, so these beat the template defaults in tokens.css.
+  Delete this file's declarations to return to the starter palette.
 */
 
 :root {
+	--color-bg: light-dark(#f4f1ec, #0e0e10);
+	--color-surface: light-dark(#fffefa, #1c1c20);
+	--color-fill: light-dark(rgb(26 26 28 / 0.05), rgb(245 242 235 / 0.06));
+	--color-fill-strong: light-dark(rgb(26 26 28 / 0.08), rgb(245 242 235 / 0.1));
+	--color-text: light-dark(#1a1a1c, #f5f2eb);
+	--color-text-secondary: light-dark(rgb(26 26 28 / 0.72), rgb(245 242 235 / 0.72));
+	--color-muted: light-dark(rgb(26 26 28 / 0.58), rgb(245 242 235 / 0.58));
+	--color-border: light-dark(rgb(26 26 28 / 0.08), rgb(245 242 235 / 0.1));
+	--color-border-subtle: light-dark(rgb(26 26 28 / 0.06), rgb(245 242 235 / 0.08));
+	--color-border-strong: light-dark(rgb(26 26 28 / 0.16), rgb(245 242 235 / 0.18));
+	--color-ring: light-dark(rgb(26 26 28 / 0.08), rgb(245 242 235 / 0.1));
+	--color-brand: light-dark(#3d5a80, #e8d5b5);
+	--color-brand-hover: light-dark(#2e4666, #f3e6d0);
+	--color-on-brand: light-dark(#fffefa, #1a1a1c);
+	--color-brand-ring: color-mix(in srgb, var(--color-brand) 22%, transparent);
+	--color-shadow: light-dark(rgb(20 16 12 / 0.08), rgb(0 0 0 / 0.45));
+	--color-shadow-strong: light-dark(rgb(20 16 12 / 0.16), rgb(0 0 0 / 0.6));
+
+	--font-size-display: clamp(2.5rem, 1.4rem + 3vw, 3.5rem);
+	--tracking-tight: -0.035em;
+	--nav-height: 56px;
+	--wide-width: 1200px;
+	--frame-margin: 0px;
+	--frame-padding: 0px;
+	--radius-xl: 22px;
+	--radius-lg: 16px;
+	--shadow-card: 0 12px 40px rgb(20 16 12 / 0.08);
+	--shadow-card-hover: 0 20px 56px rgb(20 16 12 / 0.14);
+}
+
+:root.dark {
+	--shadow-card: 0 1px 0 rgb(245 242 235 / 0.06) inset, 0 18px 40px rgb(0 0 0 / 0.35);
+	--shadow-card-hover: 0 1px 0 rgb(245 242 235 / 0.08) inset, 0 22px 48px rgb(0 0 0 / 0.45);
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not(.light) {
+		--shadow-card: 0 1px 0 rgb(245 242 235 / 0.06) inset, 0 18px 40px rgb(0 0 0 / 0.35);
+		--shadow-card-hover: 0 1px 0 rgb(245 242 235 / 0.08) inset, 0 22px 48px rgb(0 0 0 / 0.45);
+	}
+}
+
+/* The hub drafts have no full-height frame rails. */
+body::before {
+	content: none;
+	border: 0;
+}
+
+body {
+	font-family: var(--font-body), var(--font-cjk), "PingFang SC", "Hiragino Sans GB",
+		"Microsoft YaHei", sans-serif;
+}
+
+main {
+	width: min(1200px, calc(100% - 3rem));
+	margin-inline: auto;
 }

@@ -1,4 +1,6 @@
 ---
+import { t } from "../i18n/ui";
+
 interface Props {
 	/** Path of the first page, e.g. "/posts" */
 	basePath: string;
@@ -7,11 +9,12 @@ interface Props {
 }
 
 const { basePath, cursor, nextCursor } = Astro.props;
+const copy = t(Astro.currentLocale);
 ---
 
 {
 	(cursor || nextCursor) && (
-		<nav class="pagination" aria-label="Pagination">
+		<nav class="pagination" aria-label={copy.pagination}>
 			{cursor && (
 				<a href={basePath} class="btn btn--ghost">
 					<svg
@@ -26,7 +29,7 @@ const { basePath, cursor, nextCursor } = Astro.props;
 						<path d="M19 12H5" />
 						<path d="m12 19-7-7 7-7" />
 					</svg>
-					First page
+					{copy.firstPage}
 				</a>
 			)}
 			{nextCursor && (
@@ -34,7 +37,7 @@ const { basePath, cursor, nextCursor } = Astro.props;
 					href={`${basePath}?cursor=${encodeURIComponent(nextCursor)}`}
 					class="btn btn--ghost pagination__next"
 				>
-					Next page
+					{copy.nextPage}
 					<svg
 						viewBox="0 0 24 24"
 						fill="none"

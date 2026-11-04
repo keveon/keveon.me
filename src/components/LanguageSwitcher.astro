@@ -1,0 +1,257 @@
+---
+import {
+	LOCALES,
+	asLocale,
+	localeNativeLabel,
+	type Locale,
+} from "../i18n/ui";
+import { t } from "../i18n/ui";
+import { localeHref, stripLocale } from "../utils/routing";
+
+interface Props {
+	/** Published translation paths. When set, only those locales appear — missing ones are omitted, never invented. */
+	alternates?: Partial<Record<Locale, string>>;
+}
+
+const locale = asLocale(Astro.currentLocale);
+const copy = t(locale);
+const bare = stripLocale(Astro.url.pathname);
+const search = Astro.url.search;
+const currentLabel = localeNativeLabel(locale);
+
+const provided = Astro.props.alternates;
+const choiceLocales =
+	provided !== undefined
+		? LOCALES.filter((item) => Boolean(provided[item.code]))
+		: LOCALES;
+const choices = choiceLocales.map((item) => {
+	const path =
+		provided !== undefined
+			? provided[item.code]!
+			: localeHref(item.code, bare);
+	return {
+		code: item.code,
+		label: item.nativeLabel,
+		href: `${path}${search}`,
+		current: item.code === locale,
+	};
+});
+---
+
+<div class="lang-switch">
+	<button
+		type="button"
+		class="lang-switch__trigger"
+		aria-haspopup="menu"
+		aria-expanded="false"
+		aria-label={copy.language}
+		aria-controls="lang-switch-menu"
+		id="lang-switch-trigger"
+	>
+		<span class="lang-switch__current">{currentLabel}</span>
+		<svg
+			class="lang-switch__chevron"
+			viewBox="0 0 16 16"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="1.75"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			aria-hidden="true"
+		>
+			<path d="M4 6.5 8 10.5 12 6.5"></path>
+		</svg>
+	</button>
+	<ul
+		class="lang-switch__menu"
+		id="lang-switch-menu"
+		role="menu"
+		hidden
+		aria-labelledby="lang-switch-trigger"
+	>
+		{
+			choices.map((choice) => (
+				<li role="none">
+					<a
+						href={choice.href}
+						role="menuitem"
+						hreflang={choice.code}
+						lang={choice.code}
+						data-locale-choice={choice.code}
+						aria-current={choice.current ? "true" : undefined}
+						class:list={[
+							"lang-switch__option",
+							{ "lang-switch__option--current": choice.current },
+						]}
+					>
+						<span class="lang-switch__mark" aria-hidden="true">
+							{choice.current ? (
+								<svg
+									class="lang-switch__check"
+									viewBox="0 0 16 16"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="1.75"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+								>
+									<path d="m3.5 8.5 3 3 6-7" />
+								</svg>
+							) : null}
+						</span>
+						<span>{choice.label}</span>
+					</a>
+				</li>
+			))
+		}
+	</ul>
+</div>
+
+<script>
+	function persistLocale(value: string) {
+		try {
+			localStorage.setItem("locale", value);
+		} catch {
+			// Private mode can reject storage. The cookie still records the choice.
+		}
+		const secure = location.protocol === "https:" ? "; Secure" : "";
+		document.cookie = `locale=${encodeURIComponent(value)}; path=/; max-age=31536000; SameSite=Lax${secure}`;
+	}
+
+	function bindSwitcher(switcher: HTMLElement) {
+		const trigger = switcher.querySelector<HTMLButtonElement>(".lang-switch__trigger");
+		const menu = switcher.querySelector<HTMLElement>(".lang-switch__menu");
+		if (!trigger || !menu) return;
+
+		const setOpen = (open: boolean) => {
+			trigger.setAttribute("aria-expanded", open ? "true" : "false");
+			menu.hidden = !open;
+			switcher.classList.toggle("is-open", open);
+		};
+
+		trigger.addEventListener("click", (event) => {
+			event.stopPropagation();
+			setOpen(trigger.getAttribute("aria-expanded") !== "true");
+		});
+
+		menu.querySelectorAll<HTMLAnchorElement>("[data-locale-choice]").forEach((link) => {
+			link.addEventListener("click", () => {
+				const value = link.dataset.localeChoice;
+				if (value) persistLocale(value);
+			});
+		});
+
+		document.addEventListener("click", (event) => {
+			if (!switcher.contains(event.target as Node)) setOpen(false);
+		});
+
+		document.addEventListener("keydown", (event) => {
+			if (event.key === "Escape") setOpen(false);
+		});
+	}
+
+	document.querySelectorAll<HTMLElement>(".lang-switch").forEach(bindSwitcher);
+</script>
+
+<style>
+	.lang-switch {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+	}
+
+	.lang-switch__trigger {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.2rem;
+		min-width: 32px;
+		min-height: 32px;
+		padding: 0 2px;
+		border: 0;
+		border-radius: 0;
+		background: transparent;
+		box-shadow: none;
+		color: var(--color-muted);
+		font: inherit;
+		font-size: 13.5px;
+		font-weight: 400;
+		line-height: 1;
+		letter-spacing: 0.01em;
+		cursor: pointer;
+		transition: color var(--transition-fast);
+	}
+
+	.lang-switch__trigger:hover,
+	.lang-switch.is-open .lang-switch__trigger {
+		color: var(--color-text);
+		background: transparent;
+		box-shadow: none;
+	}
+
+	.lang-switch__chevron {
+		width: 11px;
+		height: 11px;
+		opacity: 0.7;
+		transition: transform var(--transition-fast);
+	}
+
+	.lang-switch.is-open .lang-switch__chevron {
+		transform: rotate(180deg);
+	}
+
+	.lang-switch__menu {
+		position: absolute;
+		top: calc(100% + 8px);
+		right: 0;
+		z-index: 40;
+		min-width: 10rem;
+		max-height: calc(6 * 38px + 0.5rem);
+		overflow-y: auto;
+		margin: 0;
+		padding: 0.25rem;
+		list-style: none;
+		border-radius: 14px;
+		background: var(--color-surface);
+		box-shadow:
+			inset 0 0 0 1px var(--color-border),
+			0 10px 28px color-mix(in oklab, var(--color-text) 10%, transparent);
+	}
+
+	.lang-switch__option {
+		display: flex;
+		align-items: center;
+		gap: 0.55rem;
+		min-height: 38px;
+		padding: 0 13px 0 12px;
+		border-radius: 10px;
+		color: var(--color-muted);
+		font-size: 14px;
+		font-weight: 400;
+		line-height: 1.3;
+		text-decoration: none;
+	}
+
+	.lang-switch__option:hover {
+		color: var(--color-text);
+		background: color-mix(in oklab, var(--color-text) 5%, transparent);
+	}
+
+	.lang-switch__option--current,
+	.lang-switch__option[aria-current="true"] {
+		color: var(--color-text);
+		font-weight: 500;
+	}
+
+	.lang-switch__mark {
+		display: inline-grid;
+		place-items: center;
+		width: 14px;
+		flex: 0 0 14px;
+	}
+
+	.lang-switch__check {
+		width: 14px;
+		height: 14px;
+	}
+</style>

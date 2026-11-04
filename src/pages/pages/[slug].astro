@@ -12,7 +12,7 @@ import { localeHref } from "../../utils/routing";
 import { resolveBlogSiteIdentity } from "../../utils/site-identity";
 import "../../styles/prose.css";
 
-import { t } from "../../i18n/ui";
+import { t, type Locale } from "../../i18n/ui";
 
 const copy = t(Astro.currentLocale);
 const slug = decodeSlug(Astro.params.slug);
@@ -31,7 +31,7 @@ const seo = page
 		})
 	: null;
 
-const alternates: Partial<Record<"zh" | "en", string>> = {};
+const alternates: Partial<Record<Locale, string>> = {};
 if (page) {
 	const { translations } = await getTranslations("pages", page.data.id);
 	for (const translation of translations) {

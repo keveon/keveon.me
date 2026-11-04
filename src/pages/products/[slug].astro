@@ -4,7 +4,7 @@ import { Blocks, defineBlockComponents, Image, PortableText } from "emdash/ui";
 import Base from "../../layouts/Base.astro";
 import FeatureBlock from "../../components/FeatureBlock.astro";
 import ProductCard from "../../components/ProductCard.astro";
-import { availabilityLabel, t } from "../../i18n/ui";
+import { availabilityLabel, t, type Locale } from "../../i18n/ui";
 import { resolveBlogSiteIdentity } from "../../utils/site-identity";
 import { contentSlug, hostOf, localeHref } from "../../utils/routing";
 import "../../styles/prose.css";
@@ -30,7 +30,7 @@ let seo = null as ReturnType<typeof getSeoMeta> | null;
 let features: NonNullable<typeof product>["data"]["features"] = [];
 let status = "";
 let domain = "";
-let alternates: Partial<Record<"zh" | "en", string>> = {};
+let alternates: Partial<Record<Locale, string>> = {};
 let related: NonNullable<typeof product>[] = [];
 
 if (product) {

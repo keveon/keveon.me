@@ -8,7 +8,7 @@ import {
 import { createPublicPageContext } from "emdash/page";
 import { Font } from "astro:assets";
 import LanguageSwitcher from "../components/LanguageSwitcher.astro";
-import { asLocale, t } from "../i18n/ui";
+import { asLocale, t, type Locale } from "../i18n/ui";
 import { absoluteUrl, localeHref } from "../utils/routing";
 import { resolveBlogSiteIdentity, siteEyebrow } from "../utils/site-identity";
 import "../styles/tokens.css";
@@ -28,7 +28,7 @@ interface Props {
 	/** Pass content reference for plugin page contributions on content pages */
 	content?: { collection: string; id: string; slug?: string | null };
 	/** Published translation paths, used for the switcher and hreflang. */
-	alternates?: Partial<Record<"zh" | "en", string>>;
+	alternates?: Partial<Record<Locale, string>>;
 }
 
 const {

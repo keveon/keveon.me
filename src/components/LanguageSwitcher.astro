@@ -1,45 +1,106 @@
 ---
-import { asLocale } from "../i18n/ui";
+import {
+	LOCALES,
+	asLocale,
+	localeNativeLabel,
+	type Locale,
+} from "../i18n/ui";
 import { t } from "../i18n/ui";
 import { localeHref, stripLocale } from "../utils/routing";
 
 interface Props {
 	/** Explicit paths for published translations. Missing locales fall back to the same path. */
-	alternates?: Partial<Record<"zh" | "en", string>>;
+	alternates?: Partial<Record<Locale, string>>;
 }
 
 const locale = asLocale(Astro.currentLocale);
 const copy = t(locale);
 const bare = stripLocale(Astro.url.pathname);
 const search = Astro.url.search;
-const zhHref = Astro.props.alternates?.zh ?? `${localeHref("zh", bare)}${search}`;
-const enHref = Astro.props.alternates?.en ?? `${localeHref("en", bare)}${search}`;
+const currentLabel = localeNativeLabel(locale);
+
+const choices = LOCALES.map((item) => {
+	const href =
+		Astro.props.alternates?.[item.code] ??
+		`${localeHref(item.code, bare)}${search}`;
+	return {
+		code: item.code,
+		label: item.nativeLabel,
+		href,
+		current: item.code === locale,
+	};
+});
 ---
 
-<nav class="lang-switch" aria-label={copy.language}>
-	<a
-		href={zhHref}
-		hreflang="zh"
-		lang="zh"
-		data-locale-choice="zh"
-		aria-current={locale === "zh" ? "true" : undefined}
+<div class="lang-switch">
+	<button
+		type="button"
+		class="lang-switch__trigger"
+		aria-haspopup="menu"
+		aria-expanded="false"
+		aria-label={copy.language}
+		aria-controls="lang-switch-menu"
+		id="lang-switch-trigger"
 	>
-		中文
-	</a>
-	<a
-		href={enHref}
-		hreflang="en"
-		lang="en"
-		data-locale-choice="en"
-		aria-current={locale === "en" ? "true" : undefined}
+		<span class="lang-switch__current">{currentLabel}</span>
+		<svg
+			class="lang-switch__chevron"
+			viewBox="0 0 16 16"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="1.75"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			aria-hidden="true"
+		>
+			<path d="M4 6.5 8 10.5 12 6.5"></path>
+		</svg>
+	</button>
+	<ul
+		class="lang-switch__menu"
+		id="lang-switch-menu"
+		role="menu"
+		hidden
+		aria-labelledby="lang-switch-trigger"
 	>
-		EN
-	</a>
-</nav>
+		{
+			choices.map((choice) => (
+				<li role="none">
+					<a
+						href={choice.href}
+						role="menuitem"
+						hreflang={choice.code}
+						lang={choice.code}
+						data-locale-choice={choice.code}
+						aria-current={choice.current ? "true" : undefined}
+						class:list={[
+							"lang-switch__option",
+							{ "lang-switch__option--current": choice.current },
+						]}
+					>
+						<span>{choice.label}</span>
+						{choice.current && (
+							<svg
+								class="lang-switch__check"
+								viewBox="0 0 16 16"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.75"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								aria-hidden="true"
+							>
+								<path d="m3.5 8.5 3 3 6-7" />
+							</svg>
+						)}
+					</a>
+				</li>
+			))
+		}
+	</ul>
+</div>
 
 <script>
-	// Remember the choice only. Nothing on the server redirects from this cookie
-	// or from Accept-Language — the URL is the locale.
 	function persistLocale(value: string) {
 		try {
 			localStorage.setItem("locale", value);
@@ -50,32 +111,133 @@ const enHref = Astro.props.alternates?.en ?? `${localeHref("en", bare)}${search}
 		document.cookie = `locale=${encodeURIComponent(value)}; path=/; max-age=31536000; SameSite=Lax${secure}`;
 	}
 
-	document.querySelectorAll<HTMLAnchorElement>("[data-locale-choice]").forEach((link) => {
-		link.addEventListener("click", () => {
-			const value = link.dataset.localeChoice;
-			if (value === "zh" || value === "en") persistLocale(value);
+	function bindSwitcher(switcher: HTMLElement) {
+		const trigger = switcher.querySelector<HTMLButtonElement>(".lang-switch__trigger");
+		const menu = switcher.querySelector<HTMLElement>(".lang-switch__menu");
+		if (!trigger || !menu) return;
+
+		const setOpen = (open: boolean) => {
+			trigger.setAttribute("aria-expanded", open ? "true" : "false");
+			menu.hidden = !open;
+			switcher.classList.toggle("is-open", open);
+		};
+
+		trigger.addEventListener("click", (event) => {
+			event.stopPropagation();
+			setOpen(trigger.getAttribute("aria-expanded") !== "true");
 		});
-	});
+
+		menu.querySelectorAll<HTMLAnchorElement>("[data-locale-choice]").forEach((link) => {
+			link.addEventListener("click", () => {
+				const value = link.dataset.localeChoice;
+				if (value) persistLocale(value);
+			});
+		});
+
+		document.addEventListener("click", (event) => {
+			if (!switcher.contains(event.target as Node)) setOpen(false);
+		});
+
+		document.addEventListener("keydown", (event) => {
+			if (event.key === "Escape") setOpen(false);
+		});
+	}
+
+	document.querySelectorAll<HTMLElement>(".lang-switch").forEach(bindSwitcher);
 </script>
 
 <style>
 	.lang-switch {
+		position: relative;
 		display: inline-flex;
 		align-items: center;
-		gap: 0.7rem;
-		font-size: 13px;
-		line-height: 1;
 	}
 
-	.lang-switch a {
-		color: var(--color-muted);
+	.lang-switch__trigger {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.3rem;
+		min-width: 2.25rem;
+		height: 2.25rem;
+		padding: 0 0.7rem;
+		border: 0;
+		border-radius: var(--radius-full);
+		background: var(--color-surface);
+		box-shadow: inset 0 0 0 1px var(--color-border);
+		color: var(--color-text-secondary);
+		font: inherit;
+		font-size: 13px;
 		font-weight: 500;
+		line-height: 1;
 		letter-spacing: 0.01em;
+		cursor: pointer;
+		transition:
+			color var(--transition-fast),
+			box-shadow var(--transition-fast);
+	}
+
+	.lang-switch__trigger:hover,
+	.lang-switch.is-open .lang-switch__trigger {
+		color: var(--color-text);
+		box-shadow: inset 0 0 0 1px var(--color-border-strong);
+	}
+
+	.lang-switch__chevron {
+		width: 12px;
+		height: 12px;
+		opacity: 0.75;
+		transition: transform var(--transition-fast);
+	}
+
+	.lang-switch.is-open .lang-switch__chevron {
+		transform: rotate(180deg);
+	}
+
+	.lang-switch__menu {
+		position: absolute;
+		top: calc(100% + 0.4rem);
+		right: 0;
+		z-index: 40;
+		min-width: 9.5rem;
+		margin: 0;
+		padding: 0.3rem;
+		list-style: none;
+		border-radius: var(--radius-md, 0.75rem);
+		background: var(--color-surface);
+		box-shadow:
+			inset 0 0 0 1px var(--color-border),
+			0 12px 28px color-mix(in oklab, var(--color-text) 12%, transparent);
+	}
+
+	.lang-switch__option {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		min-height: 2rem;
+		padding: 0.35rem 0.65rem;
+		border-radius: calc(var(--radius-md, 0.75rem) - 0.15rem);
+		color: var(--color-text-secondary);
+		font-size: 13px;
+		font-weight: 500;
 		text-decoration: none;
 	}
 
-	.lang-switch a:hover,
-	.lang-switch a[aria-current="true"] {
+	.lang-switch__option:hover {
 		color: var(--color-text);
+		background: color-mix(in oklab, var(--color-text) 6%, transparent);
+	}
+
+	.lang-switch__option--current,
+	.lang-switch__option[aria-current="true"] {
+		color: var(--color-text);
+		font-weight: 600;
+	}
+
+	.lang-switch__check {
+		width: 14px;
+		height: 14px;
+		flex: 0 0 auto;
 	}
 </style>

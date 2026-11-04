@@ -13,7 +13,7 @@ import { Comments, CommentForm } from "emdash/ui/comments";
 import Base from "../../layouts/Base.astro";
 import Byline from "../../components/Byline.astro";
 import PostCard from "../../components/PostCard.astro";
-import { t, readingMinutes } from "../../i18n/ui";
+import { t, readingMinutes, type Locale } from "../../i18n/ui";
 import { formatDate } from "../../utils/locale";
 import { getReadingTime } from "../../utils/reading-time";
 import { localeHref } from "../../utils/routing";
@@ -104,7 +104,7 @@ const postsHref = localeHref(Astro.currentLocale, "/posts");
 const publishDate = publishedAt ? formatDate(publishedAt, "long", Astro.currentLocale) : null;
 const readingLabel = readingMinutes(Astro.currentLocale, readingTime);
 
-const alternates: Partial<Record<"zh" | "en", string>> = {};
+const alternates: Partial<Record<Locale, string>> = {};
 if (post) {
 	const { translations } = await getTranslations("posts", post.data.id);
 	for (const translation of translations) {

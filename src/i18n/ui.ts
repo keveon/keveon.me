@@ -1,8 +1,7 @@
-export type Locale = "zh" | "en";
+import { asLocale } from "./locales";
 
-export function asLocale(value: string | undefined | null): Locale {
-	return value === "en" ? "en" : "zh";
-}
+export type { Locale } from "./locales";
+export { asLocale, LOCALES, localeNativeLabel } from "./locales";
 
 const availability = {
 	zh: {

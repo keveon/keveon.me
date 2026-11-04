@@ -1,25 +1,56 @@
 {
-	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "roost",
-	"main": "./src/worker.ts",
-	"compatibility_date": "2026-02-24",
-	"compatibility_flags": ["nodejs_compat"],
-	"d1_databases": [
-		{
-			"binding": "DB",
-			"database_name": "roost","database_id": "914fd0b9-a616-4ebf-aa44-4509fe0993f1",
-		},
-	],
-	"r2_buckets": [
-		{
-			"binding": "MEDIA",
-			"bucket_name": "assets","preview_bucket_name": "assets",
-		},
-	],
-	// Sandboxed plugins require Worker Loader, available on Workers paid plans. Uncomment to enable:
-	// "worker_loaders": [{ "binding": "LOADER" }],
-	// General maintenance cron trigger
-	"triggers": {
-		"crons": ["* * * * *"],
-	},
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "roost",
+  "main": "./src/worker.ts",
+  "compatibility_date": "2026-02-24",
+  "compatibility_flags": ["nodejs_compat"],
+  // Whether Wrangler should keep variables configured in the dashboard on deploy
+  "keep_vars": true,
+  // Enables automatically ingest, store, filter, and analyze logging data emitted from Cloudflare Workers
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+    },
+    "traces": {
+      "enabled": true,
+      "persist": true,
+      "head_sampling_rate": 1,
+    },
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "roost",
+      "database_id": "914fd0b9-a616-4ebf-aa44-4509fe0993f1",
+    },
+  ],
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "assets",
+      "preview_bucket_name": "assets",
+    },
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "CACHE",
+      "id": "d6973bbf6b2748f6a4d96b832704e9f6",
+    },
+  ],
+  // Sandboxed plugins require Worker Loader, available on Workers paid plans. Uncomment to enable:
+  "worker_loaders": [
+    {
+      "binding": "LOADER",
+    },
+  ],
+  "send_email": [
+    {
+      "name": "EMAIL",
+    },
+  ],
+  // General maintenance cron trigger
+  "triggers": {
+    "crons": ["* * * * *"],
+  },
 }

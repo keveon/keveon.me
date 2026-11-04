@@ -78,21 +78,22 @@ const choices = LOCALES.map((item) => {
 							{ "lang-switch__option--current": choice.current },
 						]}
 					>
+						<span class="lang-switch__mark" aria-hidden="true">
+							{choice.current ? (
+								<svg
+									class="lang-switch__check"
+									viewBox="0 0 16 16"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="1.75"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+								>
+									<path d="m3.5 8.5 3 3 6-7" />
+								</svg>
+							) : null}
+						</span>
 						<span>{choice.label}</span>
-						{choice.current && (
-							<svg
-								class="lang-switch__check"
-								viewBox="0 0 16 16"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="1.75"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								aria-hidden="true"
-							>
-								<path d="m3.5 8.5 3 3 6-7" />
-							</svg>
-						)}
 					</a>
 				</li>
 			))
@@ -157,36 +158,35 @@ const choices = LOCALES.map((item) => {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		gap: 0.3rem;
-		min-width: 2.25rem;
-		height: 2.25rem;
-		padding: 0 0.7rem;
+		gap: 0.2rem;
+		min-width: 32px;
+		min-height: 32px;
+		padding: 0 2px;
 		border: 0;
-		border-radius: var(--radius-full);
-		background: var(--color-surface);
-		box-shadow: inset 0 0 0 1px var(--color-border);
-		color: var(--color-text-secondary);
+		border-radius: 0;
+		background: transparent;
+		box-shadow: none;
+		color: var(--color-muted);
 		font: inherit;
-		font-size: 13px;
-		font-weight: 500;
+		font-size: 13.5px;
+		font-weight: 400;
 		line-height: 1;
 		letter-spacing: 0.01em;
 		cursor: pointer;
-		transition:
-			color var(--transition-fast),
-			box-shadow var(--transition-fast);
+		transition: color var(--transition-fast);
 	}
 
 	.lang-switch__trigger:hover,
 	.lang-switch.is-open .lang-switch__trigger {
 		color: var(--color-text);
-		box-shadow: inset 0 0 0 1px var(--color-border-strong);
+		background: transparent;
+		box-shadow: none;
 	}
 
 	.lang-switch__chevron {
-		width: 12px;
-		height: 12px;
-		opacity: 0.75;
+		width: 11px;
+		height: 11px;
+		opacity: 0.7;
 		transition: transform var(--transition-fast);
 	}
 
@@ -196,48 +196,56 @@ const choices = LOCALES.map((item) => {
 
 	.lang-switch__menu {
 		position: absolute;
-		top: calc(100% + 0.4rem);
+		top: calc(100% + 8px);
 		right: 0;
 		z-index: 40;
-		min-width: 9.5rem;
+		min-width: 10rem;
+		max-height: calc(6 * 38px + 0.5rem);
+		overflow-y: auto;
 		margin: 0;
-		padding: 0.3rem;
+		padding: 0.25rem;
 		list-style: none;
-		border-radius: var(--radius-md, 0.75rem);
+		border-radius: 14px;
 		background: var(--color-surface);
 		box-shadow:
 			inset 0 0 0 1px var(--color-border),
-			0 12px 28px color-mix(in oklab, var(--color-text) 12%, transparent);
+			0 10px 28px color-mix(in oklab, var(--color-text) 10%, transparent);
 	}
 
 	.lang-switch__option {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
-		gap: 0.75rem;
-		min-height: 2rem;
-		padding: 0.35rem 0.65rem;
-		border-radius: calc(var(--radius-md, 0.75rem) - 0.15rem);
-		color: var(--color-text-secondary);
-		font-size: 13px;
-		font-weight: 500;
+		gap: 0.55rem;
+		min-height: 38px;
+		padding: 0 13px 0 12px;
+		border-radius: 10px;
+		color: var(--color-muted);
+		font-size: 14px;
+		font-weight: 400;
+		line-height: 1.3;
 		text-decoration: none;
 	}
 
 	.lang-switch__option:hover {
 		color: var(--color-text);
-		background: color-mix(in oklab, var(--color-text) 6%, transparent);
+		background: color-mix(in oklab, var(--color-text) 5%, transparent);
 	}
 
 	.lang-switch__option--current,
 	.lang-switch__option[aria-current="true"] {
 		color: var(--color-text);
-		font-weight: 600;
+		font-weight: 500;
+	}
+
+	.lang-switch__mark {
+		display: inline-grid;
+		place-items: center;
+		width: 14px;
+		flex: 0 0 14px;
 	}
 
 	.lang-switch__check {
 		width: 14px;
 		height: 14px;
-		flex: 0 0 auto;
 	}
 </style>

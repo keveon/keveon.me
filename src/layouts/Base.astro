@@ -56,7 +56,7 @@ if (Astro.cache?.enabled) {
 	Astro.cache.set(menuResult.cacheHint);
 }
 
-const { siteTitle, wordmark, github, siteUrl } = resolveBlogSiteIdentity(
+const { siteTitle, wordmark, socialLinks, siteUrl } = resolveBlogSiteIdentity(
 	settingsResult.data,
 );
 const homeHref = localeHref(locale, "/");
@@ -271,9 +271,13 @@ const htmlLang = locale === "zh" ? "zh-CN" : "en";
 								<a href={siteUrl}>{siteEyebrow({ siteTitle, siteUrl })}</a>
 							)
 						}
-						{github && (
-							<a href={github} rel="me">GitHub</a>
-						)}
+						{
+							socialLinks.map((link) => (
+								<a href={link.href} rel="me">
+									{link.label}
+								</a>
+							))
+						}
 						<a href={rssHref}>{copy.rss}</a>
 					</div>
 					<div class="theme-switcher" role="group" aria-label={copy.theme}>

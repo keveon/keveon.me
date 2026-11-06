@@ -1308,8 +1308,9 @@ const htmlLang = locale === "zh" ? "zh-CN" : "en";
 				height: 2rem;
 				padding: 0;
 				border-radius: var(--radius-full);
-				background: transparent;
-				box-shadow: inset 0 0 0 1px var(--color-border);
+				background: var(--color-surface);
+				border: 1px solid var(--color-border-strong);
+				box-shadow: var(--shadow-sm);
 				color: var(--color-muted);
 				line-height: 0;
 				transition:
@@ -1321,7 +1322,7 @@ const htmlLang = locale === "zh" ? "zh-CN" : "en";
 			.site-footer__links .social-nav__link:hover {
 				color: var(--color-text);
 				background: var(--color-fill);
-				box-shadow: inset 0 0 0 1px var(--color-border-strong);
+				border-color: var(--color-text);
 			}
 
 			.site-footer__links .social-nav__link :global(svg) {

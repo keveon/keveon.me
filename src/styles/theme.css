@@ -35,7 +35,57 @@
 	--shadow-card-hover: 0 20px 56px rgb(20 16 12 / 0.14);
 }
 
+/*
+ * Explicit light/dark choices. The :root block above uses light-dark() so
+ * system mode (no .light/.dark class) follows the OS. Vite lowers CSS for
+ * Chrome 111, and LightningCSS rewrites light-dark() into
+ * --lightningcss-light/dark, which track prefers-color-scheme unless a
+ * color-scheme rule in the same transform sets those variables. These plain
+ * values win by specificity either way, so the footer buttons actually
+ * change the page. Keep each side equal to the matching light-dark() argument.
+ */
+:root.light {
+	color-scheme: light;
+	--color-bg: #f4f1ec;
+	--color-surface: #fffefa;
+	--color-fill: rgb(26 26 28 / 0.05);
+	--color-fill-strong: rgb(26 26 28 / 0.08);
+	--color-text: #1a1a1c;
+	--color-text-secondary: rgb(26 26 28 / 0.72);
+	--color-muted: rgb(26 26 28 / 0.58);
+	--color-border: rgb(26 26 28 / 0.08);
+	--color-border-subtle: rgb(26 26 28 / 0.06);
+	--color-border-strong: rgb(26 26 28 / 0.16);
+	--color-ring: rgb(26 26 28 / 0.08);
+	--color-media-outline: rgb(0 0 0 / 0.1);
+	--color-brand: #3d5a80;
+	--color-brand-hover: #2e4666;
+	--color-on-brand: #fffefa;
+	--color-shadow: rgb(20 16 12 / 0.08);
+	--color-shadow-strong: rgb(20 16 12 / 0.16);
+	--shadow-card: 0 12px 40px rgb(20 16 12 / 0.08);
+	--shadow-card-hover: 0 20px 56px rgb(20 16 12 / 0.14);
+}
+
 :root.dark {
+	color-scheme: dark;
+	--color-bg: #0e0e10;
+	--color-surface: #1c1c20;
+	--color-fill: rgb(245 242 235 / 0.06);
+	--color-fill-strong: rgb(245 242 235 / 0.1);
+	--color-text: #f5f2eb;
+	--color-text-secondary: rgb(245 242 235 / 0.72);
+	--color-muted: rgb(245 242 235 / 0.58);
+	--color-border: rgb(245 242 235 / 0.1);
+	--color-border-subtle: rgb(245 242 235 / 0.08);
+	--color-border-strong: rgb(245 242 235 / 0.18);
+	--color-ring: rgb(245 242 235 / 0.1);
+	--color-media-outline: rgb(255 255 255 / 0.1);
+	--color-brand: #e8d5b5;
+	--color-brand-hover: #f3e6d0;
+	--color-on-brand: #1a1a1c;
+	--color-shadow: rgb(0 0 0 / 0.45);
+	--color-shadow-strong: rgb(0 0 0 / 0.6);
 	--shadow-card: 0 1px 0 rgb(245 242 235 / 0.06) inset, 0 18px 40px rgb(0 0 0 / 0.35);
 	--shadow-card-hover: 0 1px 0 rgb(245 242 235 / 0.08) inset, 0 22px 48px rgb(0 0 0 / 0.45);
 }

@@ -450,21 +450,21 @@ const htmlLang = locale === "zh" ? "zh-CN" : "en";
 				}
 
 				/*
-				 * Design tokens live in src/styles/tokens.css. Colors are
-				 * defined with light-dark(); these rules pin the scheme when
-				 * the footer switcher sets an explicit choice. With no class,
-				 * color-scheme: light dark follows the OS preference. The
-				 * @supports guard keeps the toggle from forcing dark UA form
-				 * controls on browsers stuck on the plain-light fallback.
+				 * Pin the scheme when the footer switcher sets an explicit
+				 * choice. With no class, color-scheme: light dark on :root
+				 * follows the OS. Do not wrap these in
+				 * @supports (color: light-dark()): production CSS is lowered
+				 * for Chrome 111 / Safari 16.4, and LightningCSS only emits
+				 * the --lightningcss-light/dark toggle on color-scheme rules
+				 * outside that supports block. Inside it, picking light left
+				 * the page on the OS palette.
 				 */
-				@supports (color: light-dark(#000, #fff)) {
-					:root.light {
-						color-scheme: light;
-					}
+				:root.light {
+					color-scheme: light;
+				}
 
-					:root.dark {
-						color-scheme: dark;
-					}
+				:root.dark {
+					color-scheme: dark;
 				}
 
 				html {

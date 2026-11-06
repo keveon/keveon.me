@@ -8,6 +8,7 @@ import {
 import { createPublicPageContext } from "emdash/page";
 import { Font } from "astro:assets";
 import LanguageSwitcher from "../components/LanguageSwitcher.astro";
+import SocialIcon from "../components/SocialIcon.astro";
 import { LOCALES, asLocale, t, type Locale } from "../i18n/ui";
 import { absoluteUrl, localeHref } from "../utils/routing";
 import { resolveBlogSiteIdentity, siteEyebrow } from "../utils/site-identity";
@@ -271,14 +272,24 @@ const htmlLang = locale === "zh" ? "zh-CN" : "en";
 								<a href={siteUrl}>{siteEyebrow({ siteTitle, siteUrl })}</a>
 							)
 						}
-						{
-							socialLinks.map((link) => (
-								<a href={link.href} rel="me">
-									{link.label}
-								</a>
-							))
-						}
 						<a href={rssHref}>{copy.rss}</a>
+						{
+							socialLinks.length > 0 && (
+								<nav class="social-nav" aria-label={copy.social}>
+									{socialLinks.map((link) => (
+										<a
+											class="social-nav__link"
+											href={link.href}
+											target="_blank"
+											rel="noopener noreferrer me"
+											aria-label={link.label}
+										>
+											<SocialIcon network={link.network} />
+										</a>
+									))}
+								</nav>
+							)
+						}
 					</div>
 					<div class="theme-switcher" role="group" aria-label={copy.theme}>
 						<button
@@ -1256,8 +1267,10 @@ const htmlLang = locale === "zh" ? "zh-CN" : "en";
 			}
 
 			.site-footer__links {
-				display: grid;
-				gap: var(--spacing-3);
+				display: flex;
+				flex-wrap: wrap;
+				align-items: center;
+				gap: 0.75rem 1.25rem;
 				list-style: none;
 			}
 
@@ -1277,6 +1290,44 @@ const htmlLang = locale === "zh" ? "zh-CN" : "en";
 			.site-footer__links svg {
 				width: 15px;
 				height: 15px;
+			}
+
+			/* Circular brand buttons, about the density of a 32px target with 16px gaps. */
+			.social-nav {
+				display: flex;
+				flex-wrap: wrap;
+				align-items: center;
+				gap: var(--spacing-4);
+			}
+
+			.site-footer__links .social-nav__link {
+				display: inline-grid;
+				place-items: center;
+				flex-shrink: 0;
+				width: 2rem;
+				height: 2rem;
+				padding: 0;
+				border-radius: var(--radius-full);
+				background: var(--color-surface);
+				border: 1px solid var(--color-border-strong);
+				box-shadow: var(--shadow-sm);
+				color: var(--color-muted);
+				line-height: 0;
+				transition:
+					color var(--transition-fast),
+					background-color var(--transition-fast),
+					box-shadow var(--transition-fast);
+			}
+
+			.site-footer__links .social-nav__link:hover {
+				color: var(--color-text);
+				background: var(--color-fill);
+				border-color: var(--color-text);
+			}
+
+			.site-footer__links .social-nav__link :global(svg) {
+				width: 1rem;
+				height: 1rem;
 			}
 
 			.site-footer__widgets :global(.widget-area) {
@@ -1367,7 +1418,8 @@ const htmlLang = locale === "zh" ? "zh-CN" : "en";
 
 			@media (forced-colors: active) {
 				.site-nav a[aria-current],
-				.theme-btn.active {
+				.theme-btn.active,
+				.social-nav__link {
 					border: 1px solid CanvasText;
 				}
 			}

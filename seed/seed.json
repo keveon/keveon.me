@@ -96,6 +96,7 @@
 			"admin": {
 				"listColumns": [
 					"title",
+					"origin",
 					"availability",
 					"order"
 				]
@@ -142,6 +143,20 @@
 					"label": "URL",
 					"type": "url",
 					"translatable": false
+				},
+				{
+					"slug": "origin",
+					"label": "Origin",
+					"type": "select",
+					"translatable": false,
+					"indexed": true,
+					"validation": {
+						"options": [
+							"built",
+							"hosted",
+							"soon"
+						]
+					}
 				},
 				{
 					"slug": "availability",

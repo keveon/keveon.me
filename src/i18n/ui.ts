@@ -20,6 +20,21 @@ const availability = {
 
 export type Availability = keyof (typeof availability)["zh"];
 
+const originLabels = {
+	zh: {
+		built: "自研",
+		hosted: "自托管",
+		soon: "筹备中",
+	},
+	en: {
+		built: "Built",
+		hosted: "Hosted",
+		soon: "Soon",
+	},
+} as const;
+
+export type Origin = keyof (typeof originLabels)["zh"];
+
 const dictionary = {
 	zh: {
 		skip: "跳到正文",
@@ -200,6 +215,16 @@ export function availabilityLabel(
 	const labels = availability[asLocale(locale)];
 	if (value in labels) return labels[value as Availability];
 	return value;
+}
+
+/** Known product origins. Anything else, including a missing field, draws no ribbon. */
+export function originKind(value: string | null | undefined): Origin | null {
+	if (value === "built" || value === "hosted" || value === "soon") return value;
+	return null;
+}
+
+export function originLabel(locale: string | undefined | null, value: Origin): string {
+	return originLabels[asLocale(locale)][value];
 }
 
 export function readingMinutes(locale: string | undefined | null, minutes: number): string {

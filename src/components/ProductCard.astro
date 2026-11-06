@@ -1,8 +1,8 @@
 ---
 import type { ContentEntry, InferCollectionData } from "emdash";
 import { Image } from "emdash/ui";
-import { availabilityLabel, t } from "../i18n/ui";
-import { contentSlug, entryPath } from "../utils/routing";
+import { originKind, originLabel, t } from "../i18n/ui";
+import { contentSlug, entryPath, hostOf } from "../utils/routing";
 
 interface Props {
 	product: ContentEntry<InferCollectionData<"products">>;
@@ -25,13 +25,21 @@ const Heading = `h${headingLevel}` as const;
 const slug = contentSlug(product);
 const href = entryPath(Astro.currentLocale, "products", slug);
 const title = product.data.title || copy.untitled;
-const status = availabilityLabel(Astro.currentLocale, product.data.availability);
+const kicker = hostOf(product.data.url);
+const origin = originKind(product.data.origin);
 const cta = product.data.url ? copy.open : copy.look;
 const mark = [...title.trim()][0] ?? "";
 ---
 
 <a class:list={["work", `work--${variant}`, `work--tone-${tone % 6}`]} href={href}>
 	<div class="work__plate">
+		{
+			origin && (
+				<span class:list={["origin-ribbon", `origin-ribbon--${origin}`]}>
+					<span>{originLabel(Astro.currentLocale, origin)}</span>
+				</span>
+			)
+		}
 		{
 			product.data.cover?.src || product.data.cover?.id ? (
 				<div class="work__image" {...product.edit.cover}>
@@ -54,7 +62,7 @@ const mark = [...title.trim()][0] ?? "";
 		}
 	</div>
 	<div class="work__body">
-		{status && <p class="work__kicker">{status}</p>}
+		{kicker && <p class="work__kicker">{kicker}</p>}
 		<Heading class="work__title" {...product.edit.title}>{title}</Heading>
 		{
 			product.data.summary && (
@@ -203,8 +211,90 @@ const mark = [...title.trim()][0] ?? "";
 		font-size: 11px;
 		font-weight: 500;
 		letter-spacing: 0.14em;
-		text-transform: uppercase;
 		color: var(--color-muted);
+	}
+
+	/* Paper corner ribbon: clipped into the plate corner. */
+	.origin-ribbon {
+		position: absolute;
+		top: 0;
+		right: 0;
+		z-index: 5;
+		width: 88px;
+		height: 88px;
+		overflow: hidden;
+		pointer-events: none;
+	}
+
+	.origin-ribbon > span {
+		position: absolute;
+		top: 16px;
+		right: -30px;
+		width: 116px;
+		text-align: center;
+		transform: rotate(45deg);
+		font-size: 11px;
+		font-weight: 500;
+		letter-spacing: 0.14em;
+		line-height: 1;
+		padding: 5px 0;
+		border: 1px solid transparent;
+		box-shadow: 0 1px 2px rgba(20, 16, 12, 0.07);
+	}
+
+	.origin-ribbon--built > span {
+		background: #1a1a1c;
+		color: #fffefa;
+	}
+
+	.origin-ribbon--hosted > span {
+		background: #fffefa;
+		color: #3d5a80;
+		border-color: rgba(61, 90, 128, 0.14);
+		box-shadow: 0 1px 2px rgba(61, 90, 128, 0.07);
+	}
+
+	.origin-ribbon--soon > span {
+		background: rgba(255, 254, 250, 0.86);
+		color: rgba(26, 26, 28, 0.48);
+		border: 1px dashed rgba(26, 26, 28, 0.18);
+		box-shadow: none;
+	}
+
+	.origin-ribbon > span::before,
+	.origin-ribbon > span::after {
+		content: "";
+		position: absolute;
+		top: 100%;
+		width: 0;
+		height: 0;
+		border-style: solid;
+		box-sizing: content-box;
+	}
+
+	.origin-ribbon > span::before {
+		left: 0;
+		border-width: 0 7px 7px 0;
+		border-color: transparent rgba(20, 16, 12, 0.22) transparent transparent;
+	}
+
+	.origin-ribbon > span::after {
+		right: 0;
+		border-width: 0 0 7px 7px;
+		border-color: transparent transparent transparent rgba(20, 16, 12, 0.22);
+	}
+
+	.origin-ribbon--hosted > span::before {
+		border-color: transparent rgba(61, 90, 128, 0.22) transparent transparent;
+	}
+
+	.origin-ribbon--hosted > span::after {
+		border-color: transparent transparent transparent rgba(61, 90, 128, 0.22);
+	}
+
+	.origin-ribbon--soon > span::before,
+	.origin-ribbon--soon > span::after {
+		opacity: 0.45;
 	}
 
 	.work__title {

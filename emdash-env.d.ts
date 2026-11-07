@@ -58,6 +58,7 @@ export interface Product {
   body?: PortableTextBlock[];
   features?: ProductFeaturesBlock[];
   url?: string;
+  repository?: string;
   origin?: "built" | "hosted" | "soon";
   availability?: "active" | "beta" | "preview" | "retired";
   order?: number;

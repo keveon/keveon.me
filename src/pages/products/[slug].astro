@@ -4,7 +4,7 @@ import { Blocks, defineBlockComponents, Image, PortableText } from "emdash/ui";
 import Base from "../../layouts/Base.astro";
 import FeatureBlock from "../../components/FeatureBlock.astro";
 import ProductCard from "../../components/ProductCard.astro";
-import { availabilityLabel, t, type Locale } from "../../i18n/ui";
+import { availabilityLabel, originKind, originLabel, t, type Locale } from "../../i18n/ui";
 import { resolveBlogSiteIdentity } from "../../utils/site-identity";
 import { contentSlug, hostOf, localeHref } from "../../utils/routing";
 import "../../styles/prose.css";
@@ -30,6 +30,8 @@ let seo = null as ReturnType<typeof getSeoMeta> | null;
 let features: NonNullable<typeof product>["data"]["features"] = [];
 let status = "";
 let domain = "";
+let repository = "";
+let origin: ReturnType<typeof originKind> = null;
 let alternates: Partial<Record<Locale, string>> = {};
 let related: NonNullable<typeof product>[] = [];
 
@@ -51,6 +53,8 @@ if (product) {
 	features = Array.isArray(product.data.features) ? product.data.features : [];
 	status = availabilityLabel(settingsLocale, product.data.availability);
 	domain = hostOf(product.data.url);
+	repository = product.data.repository?.trim() || "";
+	origin = originKind(product.data.origin);
 	const { translations } = await getTranslations("products", product.data.id);
 	for (const translation of translations) {
 		if (translation.status !== "published" || !translation.slug) continue;
@@ -114,29 +118,44 @@ if (product) {
 				)
 			}
 			{
-				product.data.url && (
+				(product.data.url || repository) && (
 					<p class="product-actions">
-						<a class="hub-btn" href={product.data.url} {...product.edit.url}>
-							{copy.open} {domain}
-							<span aria-hidden="true">→</span>
-						</a>
+						{product.data.url && (
+							<a class="hub-btn" href={product.data.url} {...product.edit.url}>
+								{copy.open} {domain}
+								<span aria-hidden="true">→</span>
+							</a>
+						)}
+						{repository && (
+							<a class="product-source" href={repository} rel="external" {...product.edit.repository}>
+								{copy.source}
+								<span aria-hidden="true">↗</span>
+							</a>
+						)}
 					</p>
 				)
 			}
 		</div>
-		<div class:list={["product-stage", `product-stage--tone-${contentSlug(product).length % 6}`]}>
-			{
-				cover ? (
-					<div class="product-stage__media" {...product.edit.cover}>
-						<Image image={cover} alt={cover.alt || product.data.title} priority sizes="(min-width: 1024px) 640px, 100vw" />
-					</div>
-				) : (
-					<span class="product-stage__mark" aria-hidden="true">
-						{[...product.data.title.trim()][0]}
-					</span>
-				)
-			}
-		</div>
+			<div class:list={["product-stage", `product-stage--tone-${contentSlug(product).length % 6}`]}>
+				{
+					origin && (
+						<span class:list={["origin-ribbon", `origin-ribbon--${origin}`]}>
+							<span>{originLabel(Astro.currentLocale, origin)}</span>
+						</span>
+					)
+				}
+				{
+					cover ? (
+						<div class="product-stage__media" {...product.edit.cover}>
+							<Image image={cover} alt={cover.alt || product.data.title} priority sizes="(min-width: 1024px) 640px, 100vw" />
+						</div>
+					) : (
+						<span class="product-stage__mark" aria-hidden="true">
+							{[...product.data.title.trim()][0]}
+						</span>
+					)
+				}
+			</div>
 	</section>
 
 	{
@@ -248,7 +267,32 @@ if (product) {
 	}
 
 	.product-actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.75rem 1.25rem;
 		margin: 1.25rem 0 0;
+	}
+
+	/*
+	 * Secondary to the primary open button: same pill geometry at a
+	 * quieter weight, so the repo link reads as an aside, not a second CTA.
+	 */
+	.product-source {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 0 0.35rem;
+		min-height: 2.75rem;
+		border-radius: 999px;
+		color: var(--color-text-secondary);
+		font-size: 0.95rem;
+		font-weight: 500;
+		text-decoration: none;
+	}
+
+	.product-source:hover {
+		color: var(--color-text);
 	}
 
 	.hub-btn {
@@ -266,6 +310,7 @@ if (product) {
 	}
 
 	.product-stage {
+		position: relative;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -288,16 +333,28 @@ if (product) {
 		}
 	}
 
-	.product-stage__media,
-	.product-stage__media :global(img) {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		border-radius: 12px;
+	/*
+	 * Same rule as the card plate: fill the stage frame, then contain the
+	 * bitmap so a 16:9 OG and a taller screenshot both stay fully visible.
+	 * Cover cropped whichever axis didn't match; EmDash ships height:auto
+	 * and inline focal points, both of which lose to keep it centered.
+	 */
+	.product-stage__media {
+		position: absolute;
+		inset: 1.5rem;
 	}
 
-	.product-stage__media {
-		min-height: 280px;
+	.product-stage__media :global(img) {
+		position: absolute;
+		inset: 0;
+		display: block;
+		width: 100%;
+		height: 100%;
+		max-width: 100%;
+		max-height: 100%;
+		object-fit: contain !important;
+		object-position: center !important;
+		border-radius: 12px;
 	}
 
 	.product-stage__mark {
@@ -305,6 +362,89 @@ if (product) {
 		font-weight: 600;
 		letter-spacing: -0.05em;
 		color: var(--color-brand);
+	}
+
+	/* Paper corner ribbon: same geometry as the card plate. */
+	.origin-ribbon {
+		position: absolute;
+		top: 0;
+		right: 0;
+		z-index: 5;
+		width: 88px;
+		height: 88px;
+		overflow: hidden;
+		pointer-events: none;
+	}
+
+	.origin-ribbon > span {
+		position: absolute;
+		top: 16px;
+		right: -30px;
+		width: 116px;
+		text-align: center;
+		transform: rotate(45deg);
+		font-size: 11px;
+		font-weight: 500;
+		letter-spacing: 0.14em;
+		line-height: 1;
+		padding: 5px 0;
+		border: 1px solid transparent;
+		box-shadow: 0 1px 2px rgba(20, 16, 12, 0.07);
+	}
+
+	.origin-ribbon--built > span {
+		background: #1a1a1c;
+		color: #fffefa;
+	}
+
+	.origin-ribbon--hosted > span {
+		background: #fffefa;
+		color: #3d5a80;
+		border-color: rgba(61, 90, 128, 0.14);
+		box-shadow: 0 1px 2px rgba(61, 90, 128, 0.07);
+	}
+
+	.origin-ribbon--soon > span {
+		background: rgba(255, 254, 250, 0.86);
+		color: rgba(26, 26, 28, 0.48);
+		border: 1px dashed rgba(26, 26, 28, 0.18);
+		box-shadow: none;
+	}
+
+	.origin-ribbon > span::before,
+	.origin-ribbon > span::after {
+		content: "";
+		position: absolute;
+		top: 100%;
+		width: 0;
+		height: 0;
+		border-style: solid;
+		box-sizing: content-box;
+	}
+
+	.origin-ribbon > span::before {
+		left: 0;
+		border-width: 0 7px 7px 0;
+		border-color: transparent rgba(20, 16, 12, 0.22) transparent transparent;
+	}
+
+	.origin-ribbon > span::after {
+		right: 0;
+		border-width: 0 0 7px 7px;
+		border-color: transparent transparent transparent rgba(20, 16, 12, 0.22);
+	}
+
+	.origin-ribbon--hosted > span::before {
+		border-color: transparent rgba(61, 90, 128, 0.22) transparent transparent;
+	}
+
+	.origin-ribbon--hosted > span::after {
+		border-color: transparent transparent transparent rgba(61, 90, 128, 0.22);
+	}
+
+	.origin-ribbon--soon > span::before,
+	.origin-ribbon--soon > span::after {
+		opacity: 0.45;
 	}
 
 	.product-section {

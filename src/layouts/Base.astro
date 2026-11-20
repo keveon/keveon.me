@@ -11,6 +11,7 @@ import LanguageSwitcher from "../components/LanguageSwitcher.astro";
 import SocialIcon from "../components/SocialIcon.astro";
 import { LOCALES, asLocale, t, type Locale } from "../i18n/ui";
 import { absoluteUrl, localeHref } from "../utils/routing";
+import { getPlausibleScriptUrl } from "../utils/plausible";
 import { resolveBlogSiteIdentity, siteEyebrow } from "../utils/site-identity";
 import "../styles/tokens.css";
 import "../styles/theme.css";
@@ -131,6 +132,7 @@ function navCurrent(url: string): "page" | "true" | undefined {
 }
 
 const htmlLang = locale === "zh" ? "zh-CN" : "en";
+const plausibleScriptUrl = await getPlausibleScriptUrl();
 ---
 
 <!doctype html>
@@ -168,6 +170,22 @@ const htmlLang = locale === "zh" ? "zh-CN" : "en";
 			title={`${siteTitle} RSS`}
 			href={rssHref}
 		/>
+		{
+			plausibleScriptUrl && (
+				<>
+					<script is:inline src={plausibleScriptUrl} defer></script>
+					<script is:inline>
+						window.plausible =
+							window.plausible ||
+							function () {
+								(window.plausible.q = window.plausible.q || []).push(
+									arguments,
+								);
+							};
+					</script>
+				</>
+			)
+		}
 		<script is:inline>
 			// Apply an explicit theme choice immediately to prevent flash.
 			// With no cookie, color-scheme: light dark follows the OS.

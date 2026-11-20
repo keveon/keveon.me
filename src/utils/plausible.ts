@@ -19,10 +19,12 @@ declare global {
 export async function getPlausibleScriptUrl(): Promise<string | null> {
 	let value: string | undefined;
 
+	// Read the Worker binding first: secrets are guaranteed to be available
+	// there at runtime. The static re-export follows the pattern EmDash uses
+	// for Worker bindings (a direct dynamic import may not resolve in the
+	// Astro Cloudflare build). process.env is a fallback for local Node
+	// tooling; it is never a build-time import.meta.env value.
 	try {
-		// Static re-export wrapper, following the pattern EmDash uses for
-		// Worker bindings; a direct dynamic import is not always resolved by
-		// the Astro Cloudflare build.
 		const { env } = await import("./plausible-env");
 		value = env?.PLAUSIBLE_SCRIPT_URL;
 	} catch {

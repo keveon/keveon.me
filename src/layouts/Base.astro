@@ -173,7 +173,7 @@ const plausibleScriptUrl = await getPlausibleScriptUrl();
 		{
 			plausibleScriptUrl && (
 				<>
-					<script is:inline src={plausibleScriptUrl} defer></script>
+					<script is:inline src={plausibleScriptUrl} async></script>
 					<script is:inline>
 						window.plausible =
 							window.plausible ||

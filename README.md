@@ -63,6 +63,17 @@ pnpm deploy
 
 The first deployment provisions the named D1 database and R2 bucket from `wrangler.jsonc`. See [Deploy to Cloudflare](https://docs.emdashcms.com/deployment/cloudflare/) for production setup, or use the deploy button above.
 
+### Plausible analytics
+
+Analytics are optional. When a `PLAUSIBLE_SCRIPT_URL` Worker secret is set, the Plausible script is added to every page automatically; otherwise no analytics code is emitted.
+
+```bash
+pnpm wrangler secret put PLAUSIBLE_SCRIPT_URL
+# paste the full script URL from your Plausible dashboard when prompted
+```
+
+For local development, set the same variable in `.env` (see `.env.example`). The script URL is never read with `import.meta.env` or committed to the repository.
+
 ## See Also
 
 - [Node.js variant](../blog) -- same template using SQLite and local file storage
